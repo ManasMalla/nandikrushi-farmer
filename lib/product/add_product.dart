@@ -679,53 +679,53 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                                 const SizedBox(
                                                   height: 12,
                                                 ),
-                                                // loginProvider.isRestaurant
-                                                //     ? SingleChildScrollView(
-                                                //         scrollDirection:
-                                                //             Axis.horizontal,
-                                                //         child: DataTable(
-                                                //             columns: const [
-                                                //               DataColumn(
-                                                //                   label: Text(
-                                                //                       "Select")),
-                                                //               DataColumn(
-                                                //                   label: Text(
-                                                //                       "Ingredient")),
-                                                //               DataColumn(
-                                                //                   label: Text(
-                                                //                       "Farmer")),
-                                                //               DataColumn(
-                                                //                   label: Text(
-                                                //                       "Date of Purchase")),
-                                                //               DataColumn(
-                                                //                   label: Text(
-                                                //                       "Qty")),
-                                                //             ],
-                                                //             rows: productProvider
-                                                //                 .orders
-                                                //                 .map((e) =>
-                                                //                     DataRow(
-                                                //                         cells: [
-                                                //                           DataCell(
-                                                //                               SizedBox()),
-                                                //                           DataCell(Text(e
-                                                //                               .values
-                                                //                               .toList()[1][0]["product_name"])),
-                                                //                           DataCell(Text(e
-                                                //                               .entries
-                                                //                               .toList()[2]
-                                                //                               .toString())),
-                                                //                           DataCell(Text(e
-                                                //                               .values
-                                                //                               .toList()[3]
-                                                //                               .toString())),
-                                                //                           DataCell(Text(e
-                                                //                               .values
-                                                //                               .toList()[1][0]["quantity"])),
-                                                //                         ]))
-                                                //                 .toList()),
-                                                //       )
-                                                //     : const SizedBox(),
+                                                loginProvider.isRestaurant || loginProvider.isStore
+                                                    ? SingleChildScrollView(
+                                                        scrollDirection:
+                                                            Axis.horizontal,
+                                                        child: DataTable(
+                                                            columns: const [
+                                                              DataColumn(
+                                                                  label: Text(
+                                                                      "Select")),
+                                                              DataColumn(
+                                                                  label: Text(
+                                                                      "Ingredient")),
+                                                              DataColumn(
+                                                                  label: Text(
+                                                                      "Farmer")),
+                                                              DataColumn(
+                                                                  label: Text(
+                                                                      "Date of Purchase")),
+                                                              DataColumn(
+                                                                  label: Text(
+                                                                      "Qty")),
+                                                            ],
+                                                            rows: productProvider
+                                                                .myPurchases
+                                                                .map((e) =>
+                                                                    DataRow(
+                                                                        cells: [
+                                                                          DataCell(
+                                                                              SizedBox()),
+                                                                          DataCell(Text(e
+                                                                              .values
+                                                                              .toList()[1][0]["product_name"])),
+                                                                          DataCell(Text(e
+                                                                              .entries
+                                                                              .toList()[2]
+                                                                              .toString())),
+                                                                          DataCell(Text(e
+                                                                              .values
+                                                                              .toList()[3]
+                                                                              .toString())),
+                                                                          DataCell(Text(e
+                                                                              .values
+                                                                              .toList()[1][0]["quantity"])),
+                                                                        ]))
+                                                                .toList()),
+                                                      )
+                                                    : const SizedBox(),
                                                 Row(
                                                   children: [
                                                     Expanded(
