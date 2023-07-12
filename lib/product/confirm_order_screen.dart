@@ -1,8 +1,10 @@
-// Copyright 2022 Manas Malla ©. All rights reserved.
+// Copyright 2022 SPOTMIES LLP ©. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 /// The dart file that includes the code for the Confirm Order Screen, coupons, payment method.
+
+// ignore_for_file: use_build_context_synchronously
 
 import 'dart:convert';
 import 'dart:developer';
@@ -11,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:intl/intl.dart';
 import 'package:nandikrushi_farmer/nav_items/profile_provider.dart';
+import 'package:nandikrushi_farmer/product/order_failure.dart';
 import 'package:nandikrushi_farmer/product/order_successful.dart';
 import 'package:nandikrushi_farmer/product/product_provider.dart';
 import 'package:nandikrushi_farmer/reusable_widgets/elevated_button.dart';
@@ -18,6 +21,7 @@ import 'package:nandikrushi_farmer/reusable_widgets/loader_screen.dart';
 import 'package:nandikrushi_farmer/reusable_widgets/snackbar.dart';
 import 'package:nandikrushi_farmer/reusable_widgets/text_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
 
 class ConfirmOrderScreen extends StatefulWidget {
   final String addressID;
@@ -29,111 +33,124 @@ class ConfirmOrderScreen extends StatefulWidget {
   State<ConfirmOrderScreen> createState() => _ConfirmOrderScreenState();
 }
 
-coupons(BuildContext context) {
-  return showDialog(
-      useRootNavigator: false,
-      context: context,
-      builder: (context) {
-        return Consumer<ProductProvider>(
-            builder: (context, productProvider, _) {
-          return Dialog(
-            backgroundColor: ElevationOverlay.colorWithOverlay(
-                Theme.of(context).colorScheme.surface,
-                Theme.of(context).colorScheme.primary,
-                0.5),
-            insetPadding: const EdgeInsets.symmetric(horizontal: 42),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    TextWidget(
-                      "Coupons",
-                      weight: FontWeight.w900,
-                      size: Theme.of(context).textTheme.titleMedium?.fontSize,
-                    ),
-                    const SizedBox(
-                      height: 16,
-                    ),
-                    ListView.builder(
-                        shrinkWrap: true,
-                        primary: false,
-                        itemCount: productProvider.coupons.length,
-                        itemBuilder: (context, index) {
-                          dynamic list = productProvider.coupons[index];
-                          return ListTile(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(
-                              productProvider.appliedCoupon.isEmpty
-                                  ? 0
-                                  : productProvider.appliedCoupon == list
-                                      ? 12
-                                      : 0,
-                            )),
-                            tileColor: productProvider.appliedCoupon.isEmpty
-                                ? null
-                                : productProvider.appliedCoupon == list
-                                    ? Theme.of(context)
-                                        .colorScheme
-                                        .secondaryContainer
-                                        .withOpacity(0.3)
-                                    : null,
-                            onTap: () async {
-                              if (productProvider.appliedCoupon.isEmpty) {
-                                productProvider.updateCoupon(list);
-                              } else if (productProvider.appliedCoupon ==
-                                  list) {
-                                productProvider.updateCoupon(list);
-                              } else {
-                                snackbar(context,
-                                    "Only one coupon can be applied per order!");
-                              }
-                              Navigator.maybeOf(context)?.maybePop();
-                            },
-                            title: Text(
-                              list["code"].toString(),
-                              style: Theme.of(context).textTheme.titleSmall,
-                            ),
-                            subtitle: TextWidget(
-                              list["name"].toString(),
-                              size: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.fontSize,
-                              align: TextAlign.start,
-                            ),
-                            trailing: productProvider.appliedCoupon.isEmpty
-                                ? Text(
-                                    "Apply",
-                                    style: Theme.of(context).textTheme.button,
-                                  )
-                                : productProvider.appliedCoupon == list
-                                    ? Icon(
-                                        Icons.bookmark_remove_rounded,
-                                        color:
-                                            Theme.of(context).colorScheme.error,
-                                      )
-                                    : null,
-                          );
-                        })
-                  ]),
-            ),
-          );
-        });
-      });
-}
-
 class _ConfirmOrderScreenState extends State<ConfirmOrderScreen> {
+  dynamic razorPay = Razorpay();
   var radioState = false;
 
   dynamic selected;
   int deliverySlot = 0;
   bool expandedItemState = false;
+  @override
+  void initState() {
+    razorPay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
+    razorPay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
+    razorPay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+    super.initState();
+  }
+
+  void _handlePaymentSuccess(PaymentSuccessResponse response) async {
+    ProfileProvider profileProvider =
+        Provider.of<ProfileProvider>(context, listen: false);
+    var data = {
+      "razorpay_payment_id": response.paymentId.toString(),
+      "razorpay_signature_id": response.signature.toString(),
+      "razorpay_order_id": response.orderId.toString(),
+    };
+    log(data.toString());
+    if (!profileProvider.shouldShowLoader) {
+      profileProvider.fetchingDataType = "place your order";
+      profileProvider.showLoader();
+      var response = await post(
+        Uri.parse(
+            "https://nkweb.sweken.com/index.php?route=extension/account/purpletree_multivendor/api/signatureapi"),
+        body: jsonEncode(data),
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+      );
+      profileProvider.hideLoader();
+      log("gatway response");
+      log(response.statusCode.toString());
+
+      dynamic resData = jsonDecode(response.body);
+      log(resData.toString());
+      if (response.statusCode == 200 && resData["status"] == true) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+              builder: (context) => OrderSuccessfulScreen(
+                    name: profileProvider.firstName,
+                    deliverySlot: "${DateFormat('EEE, dd MMM').format(
+                          DateTime.now().add(
+                            Duration(
+                              days: deliverySlot ~/ 2,
+                            ),
+                          ),
+                        ).toUpperCase()} (${deliverySlot % 2 == 0 ? '7 AM - 11 AM' : '11 AM - 3 PM'})",
+                    orderNumber: resData["response"]["order_id"].toString(),
+                  )),
+        );
+      } else {
+        log("91------------------->payment failed");
+      }
+    }
+  }
+
+  void _handlePaymentError(PaymentFailureResponse response) async {
+    ProfileProvider profileProvider =
+        Provider.of<ProfileProvider>(context, listen: false);
+    dynamic res = {
+      "order_id": profileProvider.ordKey.toString(),
+      "errorMessage": response.message.toString(),
+      "errorCode": response.code.toString(),
+      "reason": response.error.toString()
+    };
+    log(res.toString());
+    if (!profileProvider.shouldShowLoader) {
+      profileProvider.fetchingDataType = "place your order";
+      profileProvider.showLoader();
+      var response = await post(
+        Uri.parse(
+            "https://nkweb.sweken.com/index.php?route=extension/account/purpletree_multivendor/api/failureapi"),
+        body: jsonEncode(res),
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+      );
+      profileProvider.hideLoader();
+      log("gatway failure response");
+      log(response.statusCode.toString());
+
+      dynamic resData = jsonDecode(response.body);
+      log(resData["response"].toString());
+      if (response.statusCode == 200 && resData["status"] == false) {
+        Navigator.of(context).push(
+          MaterialPageRoute(
+              builder: (context) => OrderFailureScreen(
+                    response: resData["response"],
+                    name: profileProvider.firstName,
+                    deliverySlot: "${DateFormat('EEE, dd MMM').format(
+                          DateTime.now().add(
+                            Duration(
+                              days: deliverySlot ~/ 2,
+                            ),
+                          ),
+                        ).toUpperCase()} (${deliverySlot % 2 == 0 ? '7 AM - 11 AM' : '11 AM - 3 PM'})",
+                    orderNumber: resData["response"]["order_id"].toString(),
+                  )),
+        );
+      } else {
+        log("91------------------->payment failed");
+      }
+    }
+    snackbar(context, "Failure");
+  }
+
+  void _handleExternalWallet(ExternalWalletResponse response) {
+    log(response.toString());
+    // Do something when an external wallet was selected
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -183,8 +200,7 @@ class _ConfirmOrderScreenState extends State<ConfirmOrderScreen> {
                               "user_id": profileProvider.userIdForAddress,
                               "payment_method":
                                   radioState ? "" : "Cash On Delivery",
-                              "payment_type":
-                                  radioState ? "" : "Cash On Delivery",
+                              "payment_type": radioState ? "1" : "0",
                               "address_id": widget.addressID,
                               "coupon_code": "2222",
                               "time_slot": ((deliverySlot % 2) + 1).toString(),
@@ -211,15 +227,44 @@ class _ConfirmOrderScreenState extends State<ConfirmOrderScreen> {
                                 },
                               );
 
-                              log(response.statusCode.toString());
-                              if (response.statusCode == 200) {
-                                log(response.body.toString());
-                                if (jsonDecode(response.body)["status"] ||
-                                    jsonDecode(response.body)["status"]
-                                        .toString()
-                                        .contains("true")) {
-                                  log(response.body);
+                              log(response.body.toString());
 
+                              if (response.statusCode == 200) {
+                                if (radioState) {
+                                  if (jsonDecode(response.body)["status"] ||
+                                      jsonDecode(response.body)["status"]
+                                          .toString()
+                                          .contains("true")) {
+                                    log(response.body);
+                                    var orderKey = jsonDecode(response.body)[
+                                        "order_details"]["order_key"];
+                                    await profileProvider
+                                        .saveOrderKey(orderKey);
+                                    var pG = {
+                                      "key": "rzp_test_C6A6x5Mw0w0FiI",
+                                      'amount': jsonDecode(response.body)[
+                                          "order_details"]["order_amount"],
+                                      'name': jsonDecode(response.body)[
+                                          "order_details"]["firstname"],
+                                      'description': "Nandikrushi",
+                                      'order_id': orderKey,
+                                      'prefill': {
+                                        'contact': jsonDecode(response.body)[
+                                            "order_details"]["telephone "],
+                                        'email': jsonDecode(response.body)[
+                                            "order_details"]["email "]
+                                      }
+                                    };
+                                    profileProvider.hideLoader();
+                                    await razorPay.open(pG);
+                                  } else {
+                                    snackbar(context,
+                                        jsonDecode(response.body)["message"]);
+                                    profileProvider.hideLoader();
+                                    Navigator.of(context).pop();
+                                  }
+                                  log(response.body.toString());
+                                } else {
                                   navigatorState.push(
                                     MaterialPageRoute(
                                         builder: (context) =>
@@ -235,15 +280,12 @@ class _ConfirmOrderScreenState extends State<ConfirmOrderScreen> {
                                                           ),
                                                         ),
                                                       ).toUpperCase()} (${deliverySlot % 2 == 0 ? '7 AM - 11 AM' : '11 AM - 3 PM'})",
-                                              orderNumber: "XXXXXXXXXXX",
+                                              orderNumber:
+                                                  jsonDecode(response.body)[
+                                                          "order_details"]
+                                                      ["order_id"],
                                             )),
                                   );
-                                  profileProvider.hideLoader();
-                                } else {
-                                  snackbar(context,
-                                      jsonDecode(response.body)["message"]);
-                                  profileProvider.hideLoader();
-                                  Navigator.of(context).pop();
                                 }
                               } else if (response.statusCode == 400) {
                                 snackbar(context,
@@ -609,6 +651,7 @@ class _ConfirmOrderScreenState extends State<ConfirmOrderScreen> {
                                     setState(() {
                                       radioState = value ?? true;
                                     });
+                                    log(radioState.toString());
                                   }),
                             ),
                             ListTile(
@@ -622,6 +665,7 @@ class _ConfirmOrderScreenState extends State<ConfirmOrderScreen> {
                                     setState(() {
                                       radioState = value ?? false;
                                     });
+                                    log(radioState.toString());
                                   }),
                             ),
                             const SizedBox(
@@ -773,4 +817,104 @@ class _DeliverySlotChooserState extends State<DeliverySlotChooser> {
       ),
     );
   }
+}
+
+// Coupons code block //
+coupons(BuildContext context) {
+  return showDialog(
+      useRootNavigator: false,
+      context: context,
+      builder: (context) {
+        return Consumer<ProductProvider>(
+            builder: (context, productProvider, _) {
+          return Dialog(
+            backgroundColor: ElevationOverlay.colorWithOverlay(
+                Theme.of(context).colorScheme.surface,
+                Theme.of(context).colorScheme.primary,
+                0.5),
+            insetPadding: const EdgeInsets.symmetric(horizontal: 42),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    TextWidget(
+                      "Coupons",
+                      weight: FontWeight.w900,
+                      size: Theme.of(context).textTheme.titleMedium?.fontSize,
+                    ),
+                    const SizedBox(
+                      height: 16,
+                    ),
+                    ListView.builder(
+                        shrinkWrap: true,
+                        primary: false,
+                        itemCount: productProvider.coupons.length,
+                        itemBuilder: (context, index) {
+                          dynamic list = productProvider.coupons[index];
+                          return ListTile(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                              productProvider.appliedCoupon.isEmpty
+                                  ? 0
+                                  : productProvider.appliedCoupon == list
+                                      ? 12
+                                      : 0,
+                            )),
+                            tileColor: productProvider.appliedCoupon.isEmpty
+                                ? null
+                                : productProvider.appliedCoupon == list
+                                    ? Theme.of(context)
+                                        .colorScheme
+                                        .secondaryContainer
+                                        .withOpacity(0.3)
+                                    : null,
+                            onTap: () async {
+                              if (productProvider.appliedCoupon.isEmpty) {
+                                productProvider.updateCoupon(list);
+                              } else if (productProvider.appliedCoupon ==
+                                  list) {
+                                productProvider.updateCoupon(list);
+                              } else {
+                                snackbar(context,
+                                    "Only one coupon can be applied per order!");
+                              }
+                              Navigator.maybeOf(context)?.maybePop();
+                            },
+                            title: Text(
+                              list["code"].toString(),
+                              style: Theme.of(context).textTheme.titleSmall,
+                            ),
+                            subtitle: TextWidget(
+                              list["name"].toString(),
+                              size: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.fontSize,
+                              align: TextAlign.start,
+                            ),
+                            trailing: productProvider.appliedCoupon.isEmpty
+                                ? Text(
+                                    "Apply",
+                                    style: Theme.of(context).textTheme.button,
+                                  )
+                                : productProvider.appliedCoupon == list
+                                    ? Icon(
+                                        Icons.bookmark_remove_rounded,
+                                        color:
+                                            Theme.of(context).colorScheme.error,
+                                      )
+                                    : null,
+                          );
+                        })
+                  ]),
+            ),
+          );
+        });
+      });
 }

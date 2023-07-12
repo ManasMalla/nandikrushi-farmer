@@ -72,75 +72,75 @@ class _HomeScreenState extends State<HomeScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Container(
-                        decoration: BoxDecoration(
-                            color: Theme.of(context)
-                                .colorScheme
-                                .primary
-                                .withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(16)),
-                        margin: const EdgeInsets.only(top: 8, bottom: 16),
-                        width: double.infinity,
-                        child: Center(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 24.0, vertical: 8),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: TextFieldWidget(
-                                    onChanged: (_) {
-                                      setState(() {});
-                                    },
-                                    onSubmitField: () {
-                                      setState(() {});
-                                    },
-                                    textInputAction: TextInputAction.search,
-                                    hint: "Search",
-                                    controller: searchController,
-                                    hintStyle: Theme.of(context)
-                                        .textTheme
-                                        .titleMedium
-                                        ?.copyWith(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .primary
-                                                .withOpacity(0.7)),
-                                    shouldShowBorder: false,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleMedium
-                                        ?.copyWith(
-                                            color: Theme.of(context)
-                                                .colorScheme
-                                                .primary),
-                                  ),
-                                ),
-                                InkWell(
-                                  onTap: () async {
-                                    print(await FirebaseMessaging.instance
-                                        .getToken());
-                                    if (searchController
-                                        .value.text.isNotEmpty) {
-                                      setState(() {
-                                        searchController.value =
-                                            const TextEditingValue();
-                                      });
-                                    }
-                                  },
-                                  child: Icon(
-                                      searchController.value.text.isNotEmpty
-                                          ? Icons.highlight_remove_rounded
-                                          : Icons.search_rounded,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .primary),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
+                      // Container(
+                      //   decoration: BoxDecoration(
+                      //       color: Theme.of(context)
+                      //           .colorScheme
+                      //           .primary
+                      //           .withOpacity(0.15),
+                      //       borderRadius: BorderRadius.circular(16)),
+                      //   margin: const EdgeInsets.only(top: 8, bottom: 16),
+                      //   width: double.infinity,
+                      //   child: Center(
+                      //     child: Padding(
+                      //       padding: const EdgeInsets.symmetric(
+                      //           horizontal: 24.0, vertical: 8),
+                      //       child: Row(
+                      //         children: [
+                      //           Expanded(
+                      //             child: TextFieldWidget(
+                      //               onChanged: (_) {
+                      //                 setState(() {});
+                      //               },
+                      //               onSubmitField: () {
+                      //                 setState(() {});
+                      //               },
+                      //               textInputAction: TextInputAction.search,
+                      //               hint: "Search",
+                      //               controller: searchController,
+                      //               hintStyle: Theme.of(context)
+                      //                   .textTheme
+                      //                   .titleMedium
+                      //                   ?.copyWith(
+                      //                       color: Theme.of(context)
+                      //                           .colorScheme
+                      //                           .primary
+                      //                           .withOpacity(0.7)),
+                      //               shouldShowBorder: false,
+                      //               style: Theme.of(context)
+                      //                   .textTheme
+                      //                   .titleMedium
+                      //                   ?.copyWith(
+                      //                       color: Theme.of(context)
+                      //                           .colorScheme
+                      //                           .primary),
+                      //             ),
+                      //           ),
+                      //           InkWell(
+                      //             onTap: () async {
+                      //               print(await FirebaseMessaging.instance
+                      //                   .getToken());
+                      //               if (searchController
+                      //                   .value.text.isNotEmpty) {
+                      //                 setState(() {
+                      //                   searchController.value =
+                      //                       const TextEditingValue();
+                      //                 });
+                      //               }
+                      //             },
+                      //             child: Icon(
+                      //                 searchController.value.text.isNotEmpty
+                      //                     ? Icons.highlight_remove_rounded
+                      //                     : Icons.search_rounded,
+                      //                 color: Theme.of(context)
+                      //                     .colorScheme
+                      //                     .primary),
+                      //           ),
+                      //         ],
+                      //       ),
+                      //     ),
+                      //   ),
+                      // ),
                       searchController.value.text.isEmpty
                           ? Column(
                               crossAxisAlignment: CrossAxisAlignment.start,

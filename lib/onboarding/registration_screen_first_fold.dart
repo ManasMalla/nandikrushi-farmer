@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -12,12 +13,18 @@ import 'login/login_controller.dart';
 import 'login/login_provider.dart';
 
 List<Widget> registrationDetailsFirstPage(
-    BuildContext context,
-    LoginController loginPageController,
-    setState,
-    LoginProvider loginProvider,
-    BoxConstraints constraints,
-    showImagePickerSheet) {
+  BuildContext context,
+  LoginController loginPageController,
+  setState,
+  LoginProvider loginProvider,
+  BoxConstraints constraints,
+  void Function(
+          {required BoxConstraints constraints,
+          dynamic context,
+          required Function(XFile p1) onImageSelected,
+          dynamic setState})
+      showImagePickerSheet,
+) {
   return [
     Container(
       margin: const EdgeInsets.all(32),
@@ -39,7 +46,10 @@ List<Widget> registrationDetailsFirstPage(
                               iconSize: 75,
                               color: Theme.of(context).colorScheme.primary,
                               onPressed: () {
+                                log("add image key presses");
                                 showImagePickerSheet(
+                                    context: context,
+                                    setState: setState,
                                     constraints: constraints,
                                     onImageSelected: (XFile profileImage) {
                                       loginPageController.profileImage =
@@ -283,18 +293,19 @@ List<Widget> registrationDetailsFirstPage(
                   )
                 : const SizedBox(),
             TextFieldWidget(
-              controller:
-                  loginPageController.registrationPageFormControllers['email'],
-              label: 'Email Address',
-              validator: (value) {
-                if (!(value?.contains("@") ?? false) &&
-                    !(value?.contains(".") ?? false)) {
-                  return snackbar(
-                      context, "Please enter a valid email address");
-                }
-                return null;
-              },
-            ),
+                controller: loginPageController
+                    .registrationPageFormControllers['email'],
+                label: 'Email Address',
+                validator: (value) {
+                  if (value?.isNotEmpty ?? false) {
+                    if (!(value?.contains("@") ?? false) &&
+                        !(value?.contains(".") ?? false)) {
+                      return snackbar(
+                          context, "Please enter a valid email address");
+                    }
+                    return null;
+                  }
+                }),
             const SizedBox(
               height: 8,
             ),
@@ -302,38 +313,49 @@ List<Widget> registrationDetailsFirstPage(
               children: [
                 Expanded(
                   child: TextFieldWidget(
-                    controller: loginPageController
-                        .registrationPageFormControllers['password'],
-                    label: 'Create Password',
-                    obscureText: true,
-                    validator: (value) {
-                      if (value?.isEmpty ?? false) {
-                        return snackbar(
-                            context, "Please enter a valid password");
-                      }
-                      return null;
-                    },
-                  ),
+                      controller: loginPageController
+                          .registrationPageFormControllers['password'],
+                      label: 'Create Password',
+                      obscureText: true,
+                      validator: (value) {
+                        if (loginPageController
+                                .registrationPageFormControllers['email']
+                                ?.text !=
+                            "") {
+                          if (value?.isEmpty ?? false) {
+                            return snackbar(context, "Please enter password");
+                          }
+                          return null;
+                        }
+                        return null;
+                      }),
                 ),
                 const SizedBox(width: 24),
                 Expanded(
                   child: TextFieldWidget(
-                    controller: loginPageController
-                        .registrationPageFormControllers['c_password'],
-                    label: 'Confirm Password',
-                    obscureText: true,
-                    validator: (value) {
-                      if ((value?.isEmpty ?? false) &&
-                          value ==
+                      controller: loginPageController
+                          .registrationPageFormControllers['c_password'],
+                      label: 'Confirm Password',
+                      obscureText: true,
+                      validator: (value) {
+                        if ((loginPageController
+                                .registrationPageFormControllers['email']
+                                ?.text !=
+                            "")) {
+                          log("empty field");
+                          if (value?.isEmpty ?? false) {
+                            return snackbar(context, "Enter confirm password");
+                          }
+                          if (value !=
                               loginPageController
                                   .registrationPageFormControllers['password']
-                                  ?.text
-                                  .toString()) {
-                        return snackbar(context, "Oops! Passwords mismatch");
-                      }
-                      return null;
-                    },
-                  ),
+                                  ?.text) {
+                            return snackbar(
+                                context, "Oops! Passwords mismatched");
+                          }
+                        }
+                        return null;
+                      }),
                 ),
               ],
             ),

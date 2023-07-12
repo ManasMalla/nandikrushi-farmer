@@ -15,22 +15,24 @@ import 'package:provider/provider.dart';
 
 import '../nav_items/profile_provider.dart';
 
-class OrderSuccessfulScreen extends StatefulWidget {
+class OrderFailureScreen extends StatefulWidget {
   final String name;
   final String deliverySlot;
   final String orderNumber;
-  const OrderSuccessfulScreen(
+  final dynamic response;
+  const OrderFailureScreen(
       {Key? key,
       required this.name,
       required this.deliverySlot,
-      required this.orderNumber})
+      required this.orderNumber,
+      required this.response})
       : super(key: key);
 
   @override
-  State<OrderSuccessfulScreen> createState() => _OrderSuccessfulScreenState();
+  State<OrderFailureScreen> createState() => _OrderFailureScreenState();
 }
 
-class _OrderSuccessfulScreenState extends State<OrderSuccessfulScreen> {
+class _OrderFailureScreenState extends State<OrderFailureScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,13 +46,13 @@ class _OrderSuccessfulScreenState extends State<OrderSuccessfulScreen> {
           ),
           Container(
             width: double.infinity,
-            color: const Color(0xFFEFE8CC),
+            color: Theme.of(context).colorScheme.errorContainer,
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 TextWidget(
-                  'Hi ${widget.name},',
+                  'Sorry ${widget.name},',
                   weight: FontWeight.w800,
                   size: Theme.of(context).textTheme.titleLarge?.fontSize,
                 ),
@@ -58,13 +60,13 @@ class _OrderSuccessfulScreenState extends State<OrderSuccessfulScreen> {
                   height: 20,
                 ),
                 TextWidget(
-                  'Thank you for placing the order',
+                  'Unable to place your order at this time',
                   weight: FontWeight.w500,
                   size: Theme.of(context).textTheme.headlineSmall?.fontSize,
                   flow: TextOverflow.visible,
                 ),
                 TextWidget(
-                  'Your fresh produce will be harvested soon',
+                  widget.response["error_description"],
                   size: Theme.of(context).textTheme.titleMedium?.fontSize,
                   flow: TextOverflow.visible,
                 ),
@@ -78,7 +80,7 @@ class _OrderSuccessfulScreenState extends State<OrderSuccessfulScreen> {
                 ),
                 const Divider(),
                 TextWidget(
-                  'Order ID: ${widget.orderNumber}\nDelivery Slot : ${widget.deliverySlot}',
+                  'Order ID: ${widget.response["order_id"]}',
                   size: Theme.of(context).textTheme.bodySmall?.fontSize,
                   flow: TextOverflow.visible,
                 ),

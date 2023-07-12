@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:nandikrushi_farmer/nav_items/my_purchases.dart';
 
 import '../../product/my_products_page.dart';
 import '../../product/orders_page.dart';
@@ -61,8 +62,9 @@ homeOrdersCard(context, productProvider) {
                               separatorBuilder: (_, __) {
                                 return const Divider();
                               },
-                              itemCount: productProvider
-                                  .orders[itemIndex]["products"].length,
+                              itemCount: 1,
+                              // productProvider
+                              //     .orders[itemIndex]["products"].length,
                               itemBuilder: (context, productOrderIndex) {
                                 var product = productProvider.orders[itemIndex]
                                     ["products"][productOrderIndex];
@@ -107,6 +109,21 @@ homeOrdersCard(context, productProvider) {
                                                             .colorScheme
                                                             .primary
                                                             .withOpacity(0.6)),
+                                          ),
+                                          Opacity(
+                                            opacity: 0.4,
+                                            child: Text(
+                                              productProvider
+                                                          .orders[itemIndex]
+                                                              ["products"]
+                                                          .length >
+                                                      1
+                                                  ? "${productProvider.orders[itemIndex]["products"].length - 1} More products in this basket"
+                                                  : "Only one product in this basket",
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodySmall,
+                                            ),
                                           ),
                                         ],
                                       ),
@@ -254,7 +271,7 @@ homeMyProductsCard(context, productProvider) {
                     );
                   },
                   separatorBuilder: (context, _) {
-                    return SizedBox(
+                    return const SizedBox(
                       width: 12,
                     );
                   },
@@ -280,7 +297,12 @@ homeMyPurchasesCard(context, productProvider) {
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const Spacer(),
-                TextButton(onPressed: () {}, child: const Text("View More")),
+                TextButton(
+                    onPressed: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => const MyPurchasesScreen()));
+                    },
+                    child: const Text("View More")),
               ],
             ),
             const Opacity(
@@ -295,7 +317,7 @@ homeMyPurchasesCard(context, productProvider) {
                 shrinkWrap: true,
                 itemBuilder: (context, itemIndex) {
                   return Container(
-                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    // margin: const EdgeInsets.symmetric(vertical: 4),
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                         color: Theme.of(context).colorScheme.surfaceVariant,
@@ -306,8 +328,9 @@ homeMyPurchasesCard(context, productProvider) {
                         separatorBuilder: (_, __) {
                           return const Divider();
                         },
-                        itemCount: productProvider
-                            .myPurchases[itemIndex]["products"].length,
+                        itemCount: 1,
+                        // productProvider
+                        //     .myPurchases[itemIndex]["products"].length,
                         itemBuilder: (context, productOrderIndex) {
                           var product = productProvider.myPurchases[itemIndex]
                               ["products"][productOrderIndex];
@@ -336,6 +359,20 @@ homeMyPurchasesCard(context, productProvider) {
                                     style:
                                         Theme.of(context).textTheme.bodyMedium,
                                   ),
+                                  Opacity(
+                                    opacity: 0.4,
+                                    child: Text(
+                                      productProvider
+                                                  .myPurchases[itemIndex]
+                                                      ["products"]
+                                                  .length >
+                                              1
+                                          ? "${productProvider.myPurchases[itemIndex]["products"].length - 1} More products in this basket"
+                                          : "Only one product in this basket",
+                                      style:
+                                          Theme.of(context).textTheme.bodySmall,
+                                    ),
+                                  ),
                                 ],
                               ),
                             ],
@@ -344,7 +381,9 @@ homeMyPurchasesCard(context, productProvider) {
                   );
                 },
                 separatorBuilder: (context, _) {
-                  return const Divider();
+                  return const SizedBox(
+                    height: 16,
+                  );
                 },
                 itemCount: productProvider.myPurchases.length > 2
                     ? 2

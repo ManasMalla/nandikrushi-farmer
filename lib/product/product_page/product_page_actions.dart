@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 
 import '../../nav_items/my_account.dart';
@@ -5,94 +7,97 @@ import '../../reusable_widgets/snackbar.dart';
 import '../../reusable_widgets/text_widget.dart';
 
 productPageActions(context, productProvider, productDetails, profileProvider) {
+  log(productDetails["verify_seller"].toString());
   return Row(
     children: [
-      productProvider.cart
-              .where(
-                  (e) => e["product_id"] == productDetails["product_id"])
-              .isNotEmpty
-          ? OutlinedButton(
-              style: OutlinedButton.styleFrom(
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  minimumSize: Size.zero,
-                  // Set this
-                  padding: const EdgeInsets.all(4),
-                  // and this
-                  side: BorderSide(
-                      width: 1, color: Theme.of(context).colorScheme.outline),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(100))),
-              onPressed: () {
-                productProvider.modifyProductToCart(
-                    context: context,
-                    productID: productDetails["product_id"] ?? "",
-                    onSuccessful: () => null,
-                    showMessage: (_) {
-                      snackbar(context, _);
-                    },
-                    profileProvider: profileProvider);
-              },
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.edit,
-                      size: 14,
+      productDetails["verify_seller"] == "1"
+          ? productProvider.cart
+                  .where((e) => e["product_id"] == productDetails["product_id"])
+                  .isNotEmpty
+              ? OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      minimumSize: Size.zero,
+                      // Set this
+                      padding: const EdgeInsets.all(4),
+                      // and this
+                      side: BorderSide(
+                          width: 1,
+                          color: Theme.of(context).colorScheme.outline),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(100))),
+                  onPressed: () {
+                    productProvider.modifyProductToCart(
+                        context: context,
+                        productID: productDetails["product_id"] ?? "",
+                        onSuccessful: () => null,
+                        showMessage: (_) {
+                          snackbar(context, _);
+                        },
+                        profileProvider: profileProvider);
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 4.0, vertical: 2),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.edit,
+                          size: 14,
+                        ),
+                        const SizedBox(
+                          width: 6,
+                        ),
+                        TextWidget("Modify".toUpperCase(),
+                            weight: FontWeight.bold,
+                            size: Theme.of(context).textTheme.button?.fontSize),
+                      ],
                     ),
-                    const SizedBox(
-                      width: 6,
+                  ),
+                )
+              : OutlinedButton(
+                  style: OutlinedButton.styleFrom(
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      minimumSize: Size.zero,
+                      // Set this
+                      padding: const EdgeInsets.all(4),
+                      // and this
+                      side: const BorderSide(width: 1),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(100))),
+                  onPressed: () {
+                    productProvider.addProductToCart(
+                        context: context,
+                        productID: productDetails["product_id"] ?? "",
+                        onSuccessful: () => null,
+                        showMessage: (_) {
+                          snackbar(context, _);
+                        },
+                        profileProvider: profileProvider);
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 4.0, vertical: 2),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.add,
+                          size: 14,
+                          color: Colors.black,
+                        ),
+                        const SizedBox(
+                          width: 6,
+                        ),
+                        TextWidget("Add".toUpperCase(),
+                            weight: FontWeight.bold,
+                            size: Theme.of(context).textTheme.button?.fontSize),
+                      ],
                     ),
-                    TextWidget("Modify".toUpperCase(),
-                        weight: FontWeight.bold,
-                        size: Theme.of(context).textTheme.button?.fontSize),
-                  ],
-                ),
-              ),
-            )
-          : OutlinedButton(
-              style: OutlinedButton.styleFrom(
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  minimumSize: Size.zero,
-                  // Set this
-                  padding: const EdgeInsets.all(4),
-                  // and this
-                  side: const BorderSide(width: 1),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(100))),
-              onPressed: () {
-                productProvider.addProductToCart(
-                    context: context,
-                    productID: productDetails["product_id"] ?? "",
-                    onSuccessful: () => null,
-                    showMessage: (_) {
-                      snackbar(context, _);
-                    },
-                    profileProvider: profileProvider);
-              },
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.add,
-                      size: 14,
-                      color: Colors.black,
-                    ),
-                    const SizedBox(
-                      width: 6,
-                    ),
-                    TextWidget("Add".toUpperCase(),
-                        weight: FontWeight.bold,
-                        size: Theme.of(context).textTheme.button?.fontSize),
-                  ],
-                ),
-              ),
-            ),
+                  ),
+                )
+          : const SizedBox(),
       const SizedBox(
         width: 12,
       ),
@@ -184,8 +189,8 @@ productPageActions(context, productProvider, productDetails, profileProvider) {
                                       borderRadius: BorderRadius.circular(8))),
                               onPressed: () async {
                                 dialCall(
-                                    mobileNumber: productDetails["seller_mobile"] ??
-                                        "");
+                                    mobileNumber:
+                                        productDetails["seller_mobile"] ?? "");
                               },
                               child: const Text("Phone"),
                             ),

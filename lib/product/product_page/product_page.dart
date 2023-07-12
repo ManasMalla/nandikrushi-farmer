@@ -8,19 +8,14 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:nandikrushi_farmer/nav_items/my_account.dart';
 import 'package:nandikrushi_farmer/nav_items/profile_provider.dart';
-import 'package:nandikrushi_farmer/product/address_bottom_sheet.dart';
-import 'package:nandikrushi_farmer/product/product_card.dart';
 import 'package:nandikrushi_farmer/product/product_page/product_page_actions.dart';
 import 'package:nandikrushi_farmer/product/product_page/product_page_app_bar.dart';
 import 'package:nandikrushi_farmer/product/product_provider.dart';
-import 'package:nandikrushi_farmer/reusable_widgets/elevated_button.dart';
 import 'package:nandikrushi_farmer/reusable_widgets/rating_widget.dart';
-import 'package:nandikrushi_farmer/reusable_widgets/snackbar.dart';
 import 'package:nandikrushi_farmer/reusable_widgets/text_widget.dart';
 import 'package:provider/provider.dart';
-
+import 'dart:developer';
 import '../../utils/login_utils.dart';
 import 'more_farmer_produce.dart';
 
@@ -36,6 +31,9 @@ class ProductPage extends StatefulWidget {
 class _ProductPageState extends State<ProductPage> {
   @override
   Widget build(BuildContext context) {
+    // log("50");
+    // log(widget.productDetails.toString());
+    // log("52");
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
           statusBarColor: Colors.transparent,
@@ -46,6 +44,7 @@ class _ProductPageState extends State<ProductPage> {
             builder: (context, profileProvider, _) {
           double rating =
               (double.tryParse(widget.productDetails["rating"] ?? "0.0") ?? 0);
+
           return Scaffold(
             backgroundColor: Theme.of(context).colorScheme.background,
             appBar:

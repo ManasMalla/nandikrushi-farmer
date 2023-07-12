@@ -72,6 +72,8 @@ productPageAppBar(context, productProvider, profileProvider){
                                       itemBuilder:
                                       ((context, index) {
                                         return ProductCard(
+                                          verify:productProvider.cart[index]["verify_seller"] ??
+                                                      "0",
                                             type: CardType.product,
                                             productId:
                                             productProvider.cart[index]["product_id"] ??

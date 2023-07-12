@@ -1,4 +1,3 @@
-// Copyright 2022 Manas Malla ©. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -173,7 +172,7 @@ class _MyPurchasesScreenState extends State<MyPurchasesScreen> {
                     onTap: () {
                       Navigator.of(context).push(MaterialPageRoute(
                           builder: (context) => OrderDetailScreen(
-                                order: productProvider.myPurchases[itemIndex],
+                                index: itemIndex,
                               )));
                     },
                     child: Container(
@@ -194,6 +193,7 @@ class _MyPurchasesScreenState extends State<MyPurchasesScreen> {
                             var product = productProvider.myPurchases[itemIndex]
                                 ["products"][productOrderIndex];
                             return ProductCard(
+                              verify: product["verify_seller"] ?? "0",
                               canTap: false,
                               type: CardType.myPurchases,
                               productId: product["product_id"] ?? "XYZ",

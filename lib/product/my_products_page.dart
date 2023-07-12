@@ -4,10 +4,13 @@
 
 /// The dart file that includes the code for the My Products Page
 
+import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart';
 import 'package:intl/intl.dart';
 import 'package:nandikrushi_farmer/nav_items/profile_provider.dart';
 import 'package:nandikrushi_farmer/product/add_product.dart';
@@ -16,8 +19,8 @@ import 'package:nandikrushi_farmer/product/product_provider.dart';
 import 'package:nandikrushi_farmer/reusable_widgets/elevated_button.dart';
 import 'package:nandikrushi_farmer/reusable_widgets/snackbar.dart';
 import 'package:nandikrushi_farmer/reusable_widgets/text_widget.dart';
+import 'package:nandikrushi_farmer/reusable_widgets/textfield_widget.dart';
 import 'package:nandikrushi_farmer/utils/server.dart';
-import 'package:nandikrushi_farmer/utils/sort_filter.dart';
 import 'package:provider/provider.dart';
 
 import '../reusable_widgets/loader_screen.dart';
@@ -123,8 +126,17 @@ class MyProductsPage extends StatelessWidget {
                 : ListView.separated(
                     itemBuilder: (context, itemIndex) {
                       var product = productProvider.myProducts[itemIndex];
+                      TextEditingController price =
+                          TextEditingController(text: product["price"]);
+                      TextEditingController qunatity =
+                          TextEditingController(text: product["quantity"]);
+                      TextEditingController description =
+                          TextEditingController(text: product["description"]);
                       return InkWell(
                         onLongPress: () {
+                          log("129");
+                          log(product.toString());
+                          log("131");
                           showDialog(
                               context: context,
                               builder: (context) {
@@ -269,29 +281,173 @@ class MyProductsPage extends StatelessWidget {
                                 );
                               });
                         },
-                        child: ProductCard(
-                          type: CardType.myProducts,
-                          productId: product["product_id"] ?? "XYZ",
-                          productName: product["product_name"] ?? "Name",
-                          productDescription:
-                              product["description"] ?? "Description",
-                          imageURL: (Uri.tryParse(product["image"] ?? "")
-                                      ?.host
-                                      .isNotEmpty ??
-                                  false)
-                              ? (product["image"] ??
-                                  "http://images.jdmagicbox.com/comp/visakhapatnam/q2/0891px891.x891.180329082226.k1q2/catalogue/nandi-krushi-visakhapatnam-e-commerce-service-providers-aomg9cai5i-250.jpg")
-                              : "http://images.jdmagicbox.com/comp/visakhapatnam/q2/0891px891.x891.180329082226.k1q2/catalogue/nandi-krushi-visakhapatnam-e-commerce-service-providers-aomg9cai5i-250.jpg",
-                          price: double.tryParse(product["price"] ?? "00.00") ??
-                              00.00,
-                          units:
-                              "${product["quantity"] ?? "1"} ${product["units"] ?? "unit"}",
-                          location: product["place"] ?? "Visakhapatnam",
-                          additionalInformation: {
-                            "date":
-                                "${DateFormat('MMM').format(DateTime.fromMillisecondsSinceEpoch((int.tryParse(product["date_added"] ?? "0") ?? 0) * 1000))} ${int.tryParse(DateFormat('dd').format(DateTime.fromMillisecondsSinceEpoch((int.tryParse(product["date_added"] ?? "0") ?? 0) * 1000)))}${getDayOfMonthSuffix(DateTime.fromMillisecondsSinceEpoch((int.tryParse(product["date_added"] ?? "0") ?? 0) * 1000).day)} ${DateFormat('yyyy').format(DateTime.fromMillisecondsSinceEpoch((int.tryParse(product["date_added"] ?? "0") ?? 0) * 1000))}", //productProvider.orders[itemIndex]["date"],
-                            "in_stock": product["in_stock"],
-                          },
+                        child: Stack(
+                          children: [
+                            ProductCard(
+                              inStockFun: () async {
+                                ProfileProvider profileProvider =
+                                    Provider.of<ProfileProvider>(context,
+                                        listen: false);
+
+                                dynamic res = {
+                                  "product_id":
+                                      product["product_id"].toString(),
+                                  "quantity":
+                                      product["in_stock"] == "1" ? "0" : "100"
+                                };
+                                profileProvider.showLoader();
+                                var response = await post(
+                                  Uri.parse(
+                                      "https://nkweb.sweken.com/index.php?route=extension/account/purpletree_multivendor/api/productinstock"),
+                                  body: jsonEncode(res),
+                                  headers: {
+                                    "Content-Type": "application/json",
+                                    "Accept": "application/json",
+                                  },
+                                );
+                                dynamic resData = jsonDecode(response.body);
+                                log(resData.toString());
+                                productProvider.getAllProducts(
+                                    showMessage: (_) {
+                                      snackbar(context, _);
+                                    },
+                                    profileProvider: profileProvider);
+                                profileProvider.hideLoader();
+                                log("123");
+                              },
+                              verify: product["verify_seller"] ?? "0",
+                              type: CardType.myProducts,
+                              productId: product["product_id"] ?? "XYZ",
+                              productName: product["product_name"] ?? "Name",
+                              productDescription:
+                                  product["description"] ?? "Description",
+                              imageURL: (Uri.tryParse(product["image"] ?? "")
+                                          ?.host
+                                          .isNotEmpty ??
+                                      false)
+                                  ? (product["image"] ??
+                                      "http://images.jdmagicbox.com/comp/visakhapatnam/q2/0891px891.x891.180329082226.k1q2/catalogue/nandi-krushi-visakhapatnam-e-commerce-service-providers-aomg9cai5i-250.jpg")
+                                  : "http://images.jdmagicbox.com/comp/visakhapatnam/q2/0891px891.x891.180329082226.k1q2/catalogue/nandi-krushi-visakhapatnam-e-commerce-service-providers-aomg9cai5i-250.jpg",
+                              price: double.tryParse(
+                                      product["price"] ?? "00.00") ??
+                                  00.00,
+                              units:
+                                  "${product["quantity"] ?? "1"} ${product["units"] ?? "unit"}",
+                              location: product["place"] ?? "Visakhapatnam",
+                              additionalInformation: {
+                                "date":
+                                    "${DateFormat('MMM').format(DateTime.fromMillisecondsSinceEpoch((int.tryParse(product["date_added"] ?? "0") ?? 0) * 1000))} ${int.tryParse(DateFormat('dd').format(DateTime.fromMillisecondsSinceEpoch((int.tryParse(product["date_added"] ?? "0") ?? 0) * 1000)))}${getDayOfMonthSuffix(DateTime.fromMillisecondsSinceEpoch((int.tryParse(product["date_added"] ?? "0") ?? 0) * 1000).day)} ${DateFormat('yyyy').format(DateTime.fromMillisecondsSinceEpoch((int.tryParse(product["date_added"] ?? "0") ?? 0) * 1000))}", //productProvider.orders[itemIndex]["date"],
+                                "in_stock": product["in_stock"],
+                              },
+                            ),
+                            Positioned(
+                                right: 0,
+                                top: 0,
+                                child: TextButton(
+                                  onPressed: () {
+                                    log(product.toString());
+
+                                    showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                              content: SizedBox(
+                                            height: 300,
+                                            child: Consumer<ProfileProvider>(
+                                                builder: (context,
+                                                    profileProvider, _) {
+                                              return Column(
+                                                children: [
+                                                  TextWidget(
+                                                    'Update Product',
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .primary,
+                                                    weight: FontWeight.w700,
+                                                    size: MediaQuery.of(context)
+                                                            .size
+                                                            .width *
+                                                        0.045,
+                                                  ),
+                                                  Expanded(
+                                                    child: TextFieldWidget(
+                                                      controller: price,
+                                                      label: 'Price ',
+                                                    ),
+                                                  ),
+                                                  Expanded(
+                                                    child: TextFieldWidget(
+                                                      controller: qunatity,
+                                                      label: 'Quantity ',
+                                                    ),
+                                                  ),
+                                                  Expanded(
+                                                    child: TextFieldWidget(
+                                                      controller: description,
+                                                      label: 'Description ',
+                                                    ),
+                                                  ),
+                                                  Container(
+                                                    alignment: Alignment.center,
+                                                    width: 150,
+                                                    margin:
+                                                        const EdgeInsets.all(2),
+                                                    child: ElevatedButtonWidget(
+                                                      onClick: () async {
+                                                        Navigator.pop(context);
+                                                        dynamic body = {
+                                                          "product_id": product[
+                                                                  "product_id"]
+                                                              .toString(),
+                                                          "quantity": qunatity
+                                                              .text
+                                                              .toString(),
+                                                          "price": price.text
+                                                              .toString(),
+                                                          "description":
+                                                              description.text
+                                                                  .toString()
+                                                        };
+                                                        log(body.toString());
+                                                        productProvider
+                                                            .updateMyProduct(
+                                                                context,
+                                                                profileProvider:
+                                                                    profileProvider,
+                                                                body: body);
+                                                      },
+                                                      height: 40,
+                                                      bgColor: Colors.white,
+                                                      buttonName: "Update"
+                                                          .toUpperCase(),
+                                                      textColor:
+                                                          Colors.grey[900],
+                                                      textStyle:
+                                                          FontWeight.w600,
+                                                      borderRadius: 12,
+                                                      borderSideColor:
+                                                          Theme.of(context)
+                                                              .colorScheme
+                                                              .primary,
+                                                      center: true,
+                                                    ),
+                                                  ),
+                                                ],
+                                              );
+                                            }),
+                                          ));
+                                        });
+                                  },
+                                  child: TextWidget(
+                                    'Edit',
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
+                                    weight: FontWeight.w700,
+                                    size: MediaQuery.of(context).size.width *
+                                        0.035,
+                                  ),
+                                ))
+                          ],
                         ),
                       );
                     },

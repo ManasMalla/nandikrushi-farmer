@@ -29,6 +29,7 @@ moreFarmerProducts(productProvider, productDetails) {
       ListView.builder(
         itemBuilder: (context, index) {
           return ProductCard(
+            verify: productProvider.categorizedProducts["verify_seller"] ?? "0",
             includeHorizontalPadding: false,
             type: CardType.product,
             productId: productProvider

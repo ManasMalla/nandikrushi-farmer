@@ -33,13 +33,13 @@ class ProductController extends ControllerMVC {
   String? selectedSubCategory;
 
   addProduct(
-      context,
+      BuildContext context,
       List<String> image,
       List<String> unitsList,
       Function(String) showMessage,
       ProductProvider productProvider,
       ProfileProvider profileProvider) async {
-    LoginProvider loginProvider = Provider.of(context);
+    LoginProvider loginProvider = Provider.of(context, listen: false);
     var data = {
       "name": formControllers['product-name']?.text,
       "category": selectedCategory,

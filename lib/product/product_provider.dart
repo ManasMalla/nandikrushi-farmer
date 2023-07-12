@@ -84,6 +84,12 @@ class ProductProvider extends ChangeNotifier {
   Map<String, List<Map<String, String>>> categorizedProducts = {};
   Map<String, String> appliedCoupon = {};
   String myProductsMessage = "Oops!";
+  bool deliverySlot = false;
+
+  updateDeliverySlot(value) {
+    deliverySlot = value;
+    notifyListeners();
+  }
 
   getCategories(
       {required Function(String) showMessage,
@@ -297,6 +303,141 @@ class ProductProvider extends ChangeNotifier {
     }
   }
 
+  cancelOrder(BuildContext context,
+      {required ProfileProvider profileProvider, required ordId}) async {
+    profileProvider.showLoader();
+    dynamic body = {"order_id": "$ordId"};
+    var response = await post(
+      Uri.parse(
+          "https://nkweb.sweken.com/index.php?route=extension/account/purpletree_multivendor/api/getorders/cancelorder"),
+      body: jsonEncode(body),
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+    );
+    dynamic resData = jsonDecode(response.body);
+    log(resData.toString());
+    if (response.statusCode == 200 && resData["status"] == true) {
+      await getMyPurchases(
+          showMessage: (s) {
+            log(s);
+          },
+          profileProvider: profileProvider);
+    } else {
+      snackbar(context, "Something went wrong");
+    }
+    profileProvider.hideLoader();
+  }
+
+  updateTimeSlot(BuildContext context,
+      {required ProfileProvider profileProvider, required dynamic body}) async {
+    profileProvider.showLoader();
+    var response = await post(
+      Uri.parse(
+          "https://nkweb.sweken.com/index.php?route=extension/account/purpletree_multivendor/api/updateordertimeslot"),
+      body: jsonEncode(body),
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+    );
+    dynamic resData = jsonDecode(response.body);
+    log(resData.toString());
+
+    if (response.statusCode == 200 && resData["status"] == true) {
+      await getMyPurchases(
+          showMessage: (s) {
+            log(s);
+          },
+          profileProvider: profileProvider);
+    } else {
+      snackbar(context, "Something went wrong");
+    }
+    profileProvider.hideLoader();
+  }
+
+  updateMyProduct(BuildContext context,
+      {required ProfileProvider profileProvider, required dynamic body}) async {
+    profileProvider.showLoader();
+    var response = await post(
+      Uri.parse(
+          "https://nkweb.sweken.com/index.php?route=extension/account/purpletree_multivendor/api/productinstock"),
+      body: jsonEncode(body),
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+    );
+    dynamic resData = jsonDecode(response.body);
+    log(resData.toString());
+
+    if (response.statusCode == 200 && resData["status"] == true) {
+      await getMyProducts(
+          showMessage: (s) {
+            log(s);
+          },
+          profileProvider: profileProvider);
+    } else {
+      snackbar(context, "Something went wrong");
+    }
+    profileProvider.hideLoader();
+  }
+
+  acceptOrder(BuildContext context,
+      {required ProfileProvider profileProvider, required dynamic body}) async {
+    profileProvider.showLoader();
+    var response = await post(
+      Uri.parse(
+          "https://nkweb.sweken.com/index.php?route=extension/account/purpletree_multivendor/api/acceptorder"),
+      body: jsonEncode(body),
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+    );
+    dynamic resData = jsonDecode(response.body);
+    log(resData.toString());
+
+    if (response.statusCode == 200 && resData["status"] == true) {
+      await getOrders(
+          showMessage: (s) {
+            log(s);
+          },
+          profileProvider: profileProvider);
+    } else {
+      snackbar(context, "Something went wrong");
+    }
+    profileProvider.hideLoader();
+  }
+
+  rejectOrder(BuildContext context,
+      {required ProfileProvider profileProvider, required dynamic body}) async {
+    profileProvider.showLoader();
+    var response = await post(
+      Uri.parse(
+          "https://nkweb.sweken.com/index.php?route=extension/account/purpletree_multivendor/api/rejectorder"),
+      body: jsonEncode(body),
+      headers: {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+      },
+    );
+    dynamic resData = jsonDecode(response.body);
+    log(resData.toString());
+
+    if (response.statusCode == 200 && resData["status"] == true) {
+      await getOrders(
+          showMessage: (s) {
+            log(s);
+          },
+          profileProvider: profileProvider);
+    } else {
+      snackbar(context, "Something went wrong");
+    }
+    profileProvider.hideLoader();
+  }
+
   getAllProducts(
       {required Function(String) showMessage,
       required ProfileProvider profileProvider,
@@ -328,6 +469,7 @@ class ProductProvider extends ChangeNotifier {
                   element.value ==
                   int.tryParse(e["category"][0]["category_id"] ?? "-1"))
               .isNotEmpty) {
+            log("331" + e.toString());
             // var locationGeoCoded = await placemarkFromCoordinates(
             //     !e["vendor_details"][0]["location"]["lagtitude"]
             //             .toString()
@@ -358,6 +500,8 @@ class ProductProvider extends ChangeNotifier {
                           .roundToDouble() /
                       100)
                   .toString(),
+              "quantity": e["Products"][0]["quantity"].toString(),
+              "verify_seller": e["Products"][0]["verify_seller"].toString(),
               "category_id": allCategories.entries
                   .where((element) =>
                       element.value ==
@@ -647,6 +791,10 @@ class ProductProvider extends ChangeNotifier {
               //     .isNotEmpty) {
               (myPurchasesData["products"]).add({
                 "product_name": productOrderDetails["product_name"],
+                "order_status_id": element["order_status_id"],
+                "order_status": element["order_status"],
+                "delivery_time": element["delivery_details"][0]
+                    ["delivery_time"],
                 "description": products
                         .where((e) =>
                             e["product_id"] ==
@@ -1233,6 +1381,7 @@ class ProductProvider extends ChangeNotifier {
                         ),
                         ElevatedButtonWidget(
                           onClick: () async {
+                            Navigator.of(context).pop();
                             profileProvider.fetchingDataType =
                                 "modify your cart";
                             notifyListeners();
@@ -1263,6 +1412,7 @@ class ProductProvider extends ChangeNotifier {
                               }
                               return;
                             }
+
                             if (cartData.statusCode == 200) {
                               if (jsonDecode(cartData.body)["status"]) {
                                 await getAllProducts(
@@ -1284,7 +1434,7 @@ class ProductProvider extends ChangeNotifier {
                               showMessage("Failed to get data!");
                               profileProvider.hideLoader();
                             }
-                            Navigator.of(context).pop();
+                            // Navigator.of(context).pop();
                           },
                           height: 54,
                           borderRadius: 8,

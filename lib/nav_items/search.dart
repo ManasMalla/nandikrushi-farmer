@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +10,7 @@ import 'package:nandikrushi_farmer/product/product_card.dart';
 import 'package:nandikrushi_farmer/product/product_provider.dart';
 import 'package:nandikrushi_farmer/reusable_widgets/text_widget.dart';
 import 'package:nandikrushi_farmer/reusable_widgets/textfield_widget.dart';
+import 'package:nandikrushi_farmer/utils/size_config.dart';
 import 'package:provider/provider.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -81,14 +84,27 @@ class _SearchScreenState extends State<SearchScreen>
         bottom: false,
         child: Material(
           child: Scaffold(
-            floatingActionButton: FloatingActionButton(
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              foregroundColor: Theme.of(context).colorScheme.onPrimary,
-              onPressed: () {
-                Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => const BasketScreen()));
-              },
-              child: const Icon(Icons.shopping_basket_outlined),
+            floatingActionButton: Stack(
+              children: [
+                FloatingActionButton(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                  onPressed: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => const BasketScreen()));
+                  },
+                  child: const Icon(Icons.shopping_basket_outlined),
+                ),
+                Positioned(
+                    right: 0,
+                    top: 0,
+                    child: CircleAvatar(
+                      backgroundColor: productProvider.cart.length != 0
+                          ? Colors.red
+                          : Colors.transparent,
+                      radius: 4,
+                    ))
+              ],
             ),
             body: CustomScrollView(
               slivers: [
@@ -278,26 +294,70 @@ class _SearchScreenState extends State<SearchScreen>
                                                   .key]
                                               ?.where((element) => element["name"]?.toLowerCase().contains(searchController.text.toLowerCase()) ?? true)
                                               .toList()[index];
-                                          return ProductCard(
-                                              type: CardType.product,
-                                              productId:
-                                                  product?["product_id"] ??
-                                                      "XYZ",
-                                              productName:
-                                                  product?["name"] ?? "Name",
-                                              productDescription:
-                                                  product?["description"] ??
-                                                      "Description",
-                                              imageURL: product?["url"] ??
-                                                  "https://img.etimg.com/thumb/msid-64411656,width-640,resizemode-4,imgsize-226493/cow-milk.jpg",
-                                              price: double.tryParse(
-                                                      product?["price"] ??
-                                                          "00.00") ??
-                                                  00.00,
-                                              units:
-                                                  product?["units"] ?? "1 unit",
-                                              location: product?["place"] ??
-                                                  "Visakhapatnam");
+                                          log("283");
+                                          log(product.toString());
+                                          return Stack(
+                                            alignment: Alignment.center,
+                                            children: [
+                                              Opacity(
+                                                opacity:
+                                                    product?["quantity"] == "0"
+                                                        ? 0.2
+                                                        : 1.0,
+                                                child: ProductCard(
+                                                    sellerMail: product?[
+                                                        "seller_email"],
+                                                    sellerMobile: product?[
+                                                        "seller_mobile"],
+                                                    type: CardType.product,
+                                                    verify: product?["verify_seller"] ??
+                                                        "0",
+                                                    productId:
+                                                        product?["product_id"] ??
+                                                            "XYZ",
+                                                    productName:
+                                                        product?["name"] ??
+                                                            "Name",
+                                                    productDescription:
+                                                        product?["description"] ??
+                                                            "Description",
+                                                    imageURL: product?["url"] ??
+                                                        "https://img.etimg.com/thumb/msid-64411656,width-640,resizemode-4,imgsize-226493/cow-milk.jpg",
+                                                    price: double.tryParse(
+                                                            product?["price"] ??
+                                                                "00.00") ??
+                                                        00.00,
+                                                    units: product?["units"] ??
+                                                        "1 unit",
+                                                    location:
+                                                        product?["place"] ??
+                                                            "Visakhapatnam"),
+                                              ),
+                                              Positioned(
+                                                  // bottom: 50,
+                                                  // right: 60,
+                                                  child: product?["quantity"] ==
+                                                          "0"
+                                                      ? Text(
+                                                          "This product is temporarily unavailable",
+                                                          style:
+                                                              Theme.of(context)
+                                                                  .textTheme
+                                                                  .bodySmall
+                                                                  ?.copyWith(
+                                                                    color: Theme.of(
+                                                                            context)
+                                                                        .colorScheme
+                                                                        .error
+                                                                        .withOpacity(Theme.of(context).brightness ==
+                                                                                Brightness.dark
+                                                                            ? 0.1
+                                                                            : 0.9),
+                                                                  ),
+                                                        )
+                                                      : const SizedBox())
+                                            ],
+                                          );
                                         },
                                         itemCount: productProvider
                                             .categorizedProducts[productProvider

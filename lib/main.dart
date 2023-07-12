@@ -1,9 +1,7 @@
-// Copyright 2022 Manas Malla ©. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter_android/google_maps_flutter_android.dart';
 import 'package:google_maps_flutter_platform_interface/google_maps_flutter_platform_interface.dart';
@@ -69,10 +67,9 @@ class _MyAppState extends State<MyApp> {
         debugShowCheckedModeBanner: false,
         title: 'Nandikrushi Farmer',
         theme: ThemeData(
-          fontFamily: "Product Sans",
-          useMaterial3: true,
-          colorScheme: getLightTheme(loginProvider)
-        ),
+            fontFamily: "Product Sans",
+            useMaterial3: true,
+            colorScheme: getLightTheme(loginProvider)),
         darkTheme: ThemeData(
           //backgroundColor: Colors.grey.shade900,
           // primarySwatch: createMaterialColor(

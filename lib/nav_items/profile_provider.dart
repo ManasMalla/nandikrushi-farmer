@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart';
+import 'package:nandikrushi_farmer/reusable_widgets/snackbar.dart';
 import 'package:nandikrushi_farmer/utils/server.dart';
 
 import '../onboarding/login/login_provider.dart';
@@ -41,12 +42,51 @@ class ProfileProvider extends ChangeNotifier {
   Map<String, String> storeAddress = {};
   List<Map<String, String>> userAddresses = [];
   String userIdForAddress = "";
-
+  Map<String, dynamic> checkBox = {"value": false, "index": null};
+  List<Map<String, dynamic>> checkAdd = [];
+  List checkLength = [];
   List<Map<String, String>> notifications = [];
   bool isDataFetched = false;
+  dynamic ordKey;
   showLoader() {
     shouldShowLoader = true;
     notifyListeners();
+  }
+
+  saveOrderKey(value) {
+    ordKey = value;
+  }
+
+  checkBoxUpdate(value, index, BuildContext context) async {
+    checkBox = {"value": value, "index": index};
+
+    if (checkLength.isEmpty && value == true) {
+      checkLength.add(checkBox);
+      checkAdd[index] = {"num": index, "value": value};
+    }
+    if (checkLength.isEmpty && value == false) {
+      log("no addresses selected");
+      // snackbar(context, "No address selected");
+    }
+    if (checkLength.isNotEmpty && value == true) {
+      log("cant add more addresses");
+      // snackbar(context, "You can add only one address");
+    }
+    if (checkLength.isNotEmpty && value == false) {
+      checkLength.clear();
+      checkAdd[index] = {"num": index, "value": value};
+    }
+    notifyListeners();
+  }
+
+  checkBoxAdd() {
+    int i;
+    checkAdd.clear();
+    for (i = 0; i <= userAddresses.length - 1; i++) {
+      Map<String, dynamic> jsonData = {"num": i, "value": false};
+      checkAdd.add(jsonData);
+    }
+    log(checkAdd.toString());
   }
 
   hideLoader() {
@@ -139,6 +179,8 @@ class ProfileProvider extends ChangeNotifier {
             });
             userAddresses.add(body);
           }
+          checkAdd.clear();
+          checkBoxAdd();
           log(userAddresses.toString());
           notifyListeners();
         }
