@@ -33,6 +33,7 @@ class AddProductScreen extends StatefulWidget {
 
 class _AddProductScreenState extends State<AddProductScreen> {
   ProductController addProductController = ProductController();
+  var selectedIngredients = {};
   @override
   Widget build(BuildContext context) {
     return Consumer<LoginProvider>(builder: (context, loginProvider, __) {
@@ -702,12 +703,21 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                                                       "Qty")),
                                                             ],
                                                             rows: productProvider
-                                                                .myPurchases
+                                                                .myPurchases.where((element) => (int.tryParse(element["products"]
+                                  [0]["order_status_id"]) ?? 0) >= 4).toList()
                                                                 .map((e) =>
                                                                     DataRow(
                                                                         cells: [
                                                                           DataCell(
-                                                                              SizedBox()),
+                                                                              Checkbox(value: selectedIngredients.entries.where((element) => element.key == e
+                                                                              .values
+                                                                              .toList()[1][0]["product_id"]).isNotEmpty,onChanged: (_){
+                                                                                setState(() {
+                                                                                  selectedIngredients[e
+                                                                              .values
+                                                                              .toList()[1][0]["product_id"]] = _ ?? true;
+                                                                                });
+                                                                              },)),
                                                                           DataCell(Text(e
                                                                               .values
                                                                               .toList()[1][0]["product_name"])),
