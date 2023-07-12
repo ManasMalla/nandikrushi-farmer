@@ -750,16 +750,22 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                                                               dynamic>)
                                                                           .forEach(
                                                                               (element1) {
-                                                                                var tempElement = element1;
-                                                                                tempElement["farmerName"] = element.values.toList()[2];
-                                                                                tempElement["dateOfPurchase"] = element.values.toList()[3];
-                                                                                if(tempList.map((e) => e["product_name"]).contains(tempElement["product_name"])){
-
-                                                                                }else{
-
-                                                                        tempList
-                                                                            .add(tempElement);
-                                                                                }
+                                                                        var tempElement =
+                                                                            element1;
+                                                                        tempElement["farmerName"] = element
+                                                                            .values
+                                                                            .toList()[2];
+                                                                        tempElement["dateOfPurchase"] = element
+                                                                            .values
+                                                                            .toList()[3];
+                                                                        if (tempList
+                                                                            .map((e) =>
+                                                                                e["product_name"])
+                                                                            .contains(tempElement["product_name"])) {
+                                                                        } else {
+                                                                          tempList
+                                                                              .add(tempElement);
+                                                                        }
                                                                       });
                                                                       return tempList;
                                                                     })
@@ -771,7 +777,11 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                                                                 value: selectedIngredients.entries.where((element) => element.key == e["product_id"]).isNotEmpty ? selectedIngredients.entries.where((element) => element.key == e["product_id"]).first.value : false,
                                                                                 onChanged: (_) {
                                                                                   setState(() {
-                                                                                    selectedIngredients[e["product_id"]] = _ ?? !selectedIngredients.entries.where((element) => element.key == e["product_id"]).first.value;
+                                                                                    if (selectedIngredients.entries.where((element) => element.key == e["product_id"]).isNotEmpty) {
+                                                                                      selectedIngredients.remove(e["product_id"]);
+                                                                                    } else {
+                                                                                      selectedIngredients[e["product_id"]] = _ ?? !selectedIngredients.entries.where((element) => element.key == e["product_id"]).first.value;
+                                                                                    }
                                                                                   });
                                                                                 },
                                                                               )),
