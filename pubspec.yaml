@@ -45,7 +45,7 @@ dependencies:
   geocoding: ^2.0.5
   image_picker: ^0.8.5+3
   firebase_storage: ^11.0.14
-  url_launcher: ^6.1.5
+  url_launcher: ^6.1.12
   share: ^2.0.4
   flutter_svg: ^1.1.5
   google_maps_flutter: ^2.2.0

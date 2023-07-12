@@ -33,7 +33,7 @@ class AddProductScreen extends StatefulWidget {
 
 class _AddProductScreenState extends State<AddProductScreen> {
   ProductController addProductController = ProductController();
-  var selectedIngredients = {};
+  Map<dynamic, bool> selectedIngredients = {};
   @override
   Widget build(BuildContext context) {
     return Consumer<LoginProvider>(builder: (context, loginProvider, __) {
@@ -589,8 +589,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                                                       .colorScheme
                                                                       .primary,
                                                                   2.0),
-                                                          value: addProductController
-                                                              .selectedCategory,
+                                                          value: loginProvider.isFarmer ? addProductController
+                                                              .selectedCategory : (selectedIngredients.length > 1 ? "Weekly Basket": productProvider.products.where((element) => element["product_id"].toString() == selectedIngredients.keys.first).first["category_id"]),
                                                           items: productProvider
                                                               .categories.keys
                                                               .map((e) =>
@@ -711,11 +711,15 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                                                           DataCell(
                                                                               Checkbox(value: selectedIngredients.entries.where((element) => element.key == e
                                                                               .values
-                                                                              .toList()[1][0]["product_id"]).isNotEmpty,onChanged: (_){
+                                                                              .toList()[1][0]["product_id"]).isNotEmpty ? selectedIngredients.entries.where((element) => element.key == e
+                                                                              .values
+                                                                              .toList()[1][0]["product_id"]).first.value : false,onChanged: (_){
                                                                                 setState(() {
                                                                                   selectedIngredients[e
                                                                               .values
-                                                                              .toList()[1][0]["product_id"]] = _ ?? true;
+                                                                              .toList()[1][0]["product_id"]] = _ ?? !selectedIngredients.entries.where((element) => element.key == e
+                                                                              .values
+                                                                              .toList()[1][0]["product_id"]).first.value;
                                                                                 });
                                                                               },)),
                                                                           DataCell(Text(e
