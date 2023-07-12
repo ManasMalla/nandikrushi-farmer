@@ -8,6 +8,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:nandikrushi_farmer/nav_host.dart';
 import 'package:nandikrushi_farmer/nav_items/profile_provider.dart';
 import 'package:nandikrushi_farmer/onboarding/login/login_provider.dart';
@@ -23,6 +24,7 @@ import 'package:nandikrushi_farmer/utils/size_config.dart';
 import 'package:provider/provider.dart';
 
 import '../reusable_widgets/loader_screen.dart';
+import '../utils/login_utils.dart';
 
 class AddProductScreen extends StatefulWidget {
   const AddProductScreen({Key? key}) : super(key: key);
@@ -580,31 +582,59 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                                                 .textTheme
                                                                 .bodyMedium,
                                                           ),
-                                                          dropdownColor: ElevationOverlay
-                                                              .colorWithOverlay(
-                                                                  Theme.of(context)
-                                                                      .colorScheme
-                                                                      .surface,
-                                                                  Theme.of(context)
-                                                                      .colorScheme
-                                                                      .primary,
-                                                                  2.0),
-                                                          value: loginProvider.isFarmer ? addProductController
-                                                              .selectedCategory : (selectedIngredients.length > 1 ? "Weekly Basket": productProvider.products.where((element) => element["product_id"].toString() == selectedIngredients.keys.first).first["category_id"]),
-                                                          items: productProvider
-                                                              .categories.keys
-                                                              .map((e) =>
+                                                          dropdownColor: ElevationOverlay.colorWithOverlay(
+                                                              Theme.of(context)
+                                                                  .colorScheme
+                                                                  .surface,
+                                                              Theme.of(context)
+                                                                  .colorScheme
+                                                                  .primary,
+                                                              2.0),
+                                                          value: loginProvider.isFarmer || selectedIngredients.isEmpty
+                                                              ? addProductController
+                                                                  .selectedCategory
+                                                              : (selectedIngredients.length >
+                                                                      1
+                                                                  ? "Weekly Basket"
+                                                                  : productProvider
+                                                                      .products
+                                                                      .where((element) => element["product_id"].toString() == selectedIngredients.keys.first)
+                                                                      .first["category_id"]),
+                                                          items: selectedIngredients.isEmpty || selectedIngredients.length > 1
+                                                              ? productProvider.categories.keys
+                                                                  .map((e) => DropdownMenuItem(
+                                                                        value:
+                                                                            e,
+                                                                        child:
+                                                                            Text(
+                                                                          e,
+                                                                          style: Theme.of(context)
+                                                                              .textTheme
+                                                                              .bodyMedium,
+                                                                        ),
+                                                                      ))
+                                                                  .toList()
+                                                              : [
                                                                   DropdownMenuItem(
-                                                                    value: e,
+                                                                    value: productProvider
+                                                                        .products
+                                                                        .where((element) =>
+                                                                            element["product_id"].toString() ==
+                                                                            selectedIngredients.keys.first)
+                                                                        .first["category_id"],
                                                                     child: Text(
-                                                                      e,
+                                                                      productProvider
+                                                                              .products
+                                                                              .where((element) => element["product_id"].toString() == selectedIngredients.keys.first)
+                                                                              .first["category_id"] ??
+                                                                          "Weekly Basket",
                                                                       style: Theme.of(
                                                                               context)
                                                                           .textTheme
                                                                           .bodyMedium,
                                                                     ),
-                                                                  ))
-                                                              .toList(),
+                                                                  )
+                                                                ],
                                                           onChanged: (_) {
                                                             setState(() {
                                                               addProductController
@@ -680,7 +710,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                                 const SizedBox(
                                                   height: 12,
                                                 ),
-                                                loginProvider.isRestaurant || loginProvider.isStore
+                                                loginProvider.isRestaurant ||
+                                                        loginProvider.isStore
                                                     ? SingleChildScrollView(
                                                         scrollDirection:
                                                             Axis.horizontal,
@@ -702,42 +733,54 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                                                   label: Text(
                                                                       "Qty")),
                                                             ],
-                                                            rows: productProvider
-                                                                .myPurchases.where((element) => (int.tryParse(element["products"]
-                                  [0]["order_status_id"]) ?? 0) >= 4).toList()
-                                                                .map((e) =>
-                                                                    DataRow(
-                                                                        cells: [
-                                                                          DataCell(
-                                                                              Checkbox(value: selectedIngredients.entries.where((element) => element.key == e
-                                                                              .values
-                                                                              .toList()[1][0]["product_id"]).isNotEmpty ? selectedIngredients.entries.where((element) => element.key == e
-                                                                              .values
-                                                                              .toList()[1][0]["product_id"]).first.value : false,onChanged: (_){
-                                                                                setState(() {
-                                                                                  selectedIngredients[e
-                                                                              .values
-                                                                              .toList()[1][0]["product_id"]] = _ ?? !selectedIngredients.entries.where((element) => element.key == e
-                                                                              .values
-                                                                              .toList()[1][0]["product_id"]).first.value;
-                                                                                });
-                                                                              },)),
-                                                                          DataCell(Text(e
-                                                                              .values
-                                                                              .toList()[1][0]["product_name"])),
-                                                                          DataCell(Text(e
-                                                                              .entries
-                                                                              .toList()[2]
-                                                                              .toString())),
-                                                                          DataCell(Text(e
-                                                                              .values
-                                                                              .toList()[3]
-                                                                              .toString())),
-                                                                          DataCell(Text(e
-                                                                              .values
-                                                                              .toList()[1][0]["quantity"])),
-                                                                        ]))
-                                                                .toList()),
+                                                            rows:
+                                                                productProvider
+                                                                    .myPurchases
+                                                                    .where((element) =>
+                                                                        (int.tryParse(element["products"][0]["order_status_id"]) ??
+                                                                            0) >=
+                                                                        4)
+                                                                    .fold<List<dynamic>>(
+                                                                        [],
+                                                                        (previousValue,
+                                                                            element) {
+                                                                      var tempList =
+                                                                          previousValue;
+                                                                      (element.values.toList()[1] as List<
+                                                                              dynamic>)
+                                                                          .forEach(
+                                                                              (element1) {
+                                                                                var tempElement = element1;
+                                                                                tempElement["farmerName"] = element.values.toList()[2];
+                                                                                tempElement["dateOfPurchase"] = element.values.toList()[3];
+                                                                                if(tempList.map((e) => e["product_name"]).contains(tempElement["product_name"])){
+
+                                                                                }else{
+
+                                                                        tempList
+                                                                            .add(tempElement);
+                                                                                }
+                                                                      });
+                                                                      return tempList;
+                                                                    })
+                                                                    .toList()
+                                                                    .map((e) =>
+                                                                        DataRow(
+                                                                            cells: [
+                                                                              DataCell(Checkbox(
+                                                                                value: selectedIngredients.entries.where((element) => element.key == e["product_id"]).isNotEmpty ? selectedIngredients.entries.where((element) => element.key == e["product_id"]).first.value : false,
+                                                                                onChanged: (_) {
+                                                                                  setState(() {
+                                                                                    selectedIngredients[e["product_id"]] = _ ?? !selectedIngredients.entries.where((element) => element.key == e["product_id"]).first.value;
+                                                                                  });
+                                                                                },
+                                                                              )),
+                                                                              DataCell(Text(e["product_name"])),
+                                                                              DataCell(Text(capitalize(e["farmerName"]))),
+                                                                              DataCell(Text(DateFormat("hh:mm a, dd MMM yyyy").format(DateTime.fromMillisecondsSinceEpoch((int.tryParse(e["dateOfPurchase"]) ?? DateTime.now().millisecondsSinceEpoch) * 1000)))),
+                                                                              DataCell(Text(e["quantity"])),
+                                                                            ]))
+                                                                    .toList()),
                                                       )
                                                     : const SizedBox(),
                                                 Row(
