@@ -254,17 +254,16 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                     onTap: () {
                                       if (productProvider.products
                                           .where((element) =>
-                                              element["product_id"] ==
+                                              element.productId.toString() ==
                                               item["product_id"])
                                           .isNotEmpty) {
                                         Navigator.of(context).push(
                                             MaterialPageRoute(
                                                 builder: (context) => ProductPage(
-                                                    productDetails: productProvider
+                                                    product: productProvider
                                                         .products
                                                         .firstWhere((element) =>
-                                                            element[
-                                                                "product_id"] ==
+                                                            element.productId.toString() ==
                                                             item[
                                                                 "product_id"]))));
                                       }

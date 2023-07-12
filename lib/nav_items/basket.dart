@@ -81,7 +81,7 @@ class _BasketScreenState extends State<BasketScreen> {
                                   // verify: productProvider.cart[index]
                                   //         ["verify_seller"] ??
                                   //     "0",
-                                  verify: "1",
+                                  verify: true,
                                   type: CardType.product,
                                   productId: productProvider.cart[index]
                                           ["product_id"] ??

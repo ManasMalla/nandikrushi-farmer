@@ -16,13 +16,14 @@ import 'package:nandikrushi_farmer/reusable_widgets/rating_widget.dart';
 import 'package:nandikrushi_farmer/reusable_widgets/text_widget.dart';
 import 'package:provider/provider.dart';
 import 'dart:developer';
+import '../../domain/entity/product.dart';
 import '../../utils/login_utils.dart';
 import 'more_farmer_produce.dart';
 
 class ProductPage extends StatefulWidget {
-  final Map<String, String> productDetails;
+  final Product product;
 
-  const ProductPage({Key? key, required this.productDetails}) : super(key: key);
+  const ProductPage({Key? key, required this.product}) : super(key: key);
 
   @override
   State<ProductPage> createState() => _ProductPageState();
@@ -43,7 +44,7 @@ class _ProductPageState extends State<ProductPage> {
         return Consumer<ProfileProvider>(
             builder: (context, profileProvider, _) {
           double rating =
-              (double.tryParse(widget.productDetails["rating"] ?? "0.0") ?? 0);
+              (widget.product.aggregateRating);
 
           return Scaffold(
             backgroundColor: Theme.of(context).colorScheme.background,
@@ -67,7 +68,7 @@ class _ProductPageState extends State<ProductPage> {
                             width: double.infinity,
                             alignment: Alignment.center,
                             child: Image.network(
-                              widget.productDetails["url"] ?? "",
+                              widget.product.image,
                               fit: BoxFit.cover,
                             ),
                           ),
@@ -75,7 +76,7 @@ class _ProductPageState extends State<ProductPage> {
                             height: 32,
                           ),
                           Text(
-                            widget.productDetails["name"] ?? "Product Name",
+                            widget.product.name,
                             style: Theme.of(context)
                                 .textTheme
                                 .headlineSmall
@@ -86,11 +87,11 @@ class _ProductPageState extends State<ProductPage> {
                                         ?.fontSize),
                           ),
                           Text(
-                            widget.productDetails["category_id"] ?? "Category",
+                            widget.product.category,
                             style: Theme.of(context).textTheme.bodyMedium,
                           ),
                           TextWidget(
-                            widget.productDetails["units"] ?? "1 unit",
+                            widget.product.units,
                             weight: FontWeight.w700,
                             color: Colors.grey,
                           ),
@@ -107,10 +108,7 @@ class _ProductPageState extends State<ProductPage> {
                                 color: Theme.of(context).colorScheme.primary,
                               ),
                               TextWidget(
-                                double.tryParse(
-                                            widget.productDetails["price"] ??
-                                                "")
-                                        ?.toStringAsFixed(2) ??
+                                widget.product.price.toStringAsFixed(2) ??
                                     "",
                                 size: Theme.of(context)
                                     .textTheme
@@ -159,33 +157,28 @@ class _ProductPageState extends State<ProductPage> {
                               const SizedBox(
                                 width: 8,
                               ),
-                              ((jsonDecode(widget.productDetails[
-                                                          "customer_ratings"] ??
-                                                      "{}")
-                                                  as Map<String, dynamic>?)
-                                              ?.length ??
-                                          0) ==
-                                      0
-                                  ? SizedBox()
-                                  : Text(
-                                      ((jsonDecode(widget.productDetails[
-                                                              "customer_ratings"] ??
-                                                          "{}")
-                                                      as Map<String, dynamic>?)
-                                                  ?.length ??
-                                              0)
-                                          .toString(),
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleMedium,
-                                    )
+                              //TODO Add customer reviews
+                              // widget.product.reviews.isEmpty
+                              //     ? const SizedBox()
+                              //     : Text(
+                              //         ((jsonDecode(widget.productDetails[
+                              //                                 "customer_ratings"] ??
+                              //                             "{}")
+                              //                         as Map<String, dynamic>?)
+                              //                     ?.length ??
+                              //                 0)
+                              //             .toString(),
+                              //         style: Theme.of(context)
+                              //             .textTheme
+                              //             .titleMedium,
+                              //       )
                             ],
                           ),
                           const SizedBox(
                             height: 16,
                           ),
                           productPageActions(context, productProvider,
-                              widget.productDetails, profileProvider),
+                              widget.product, profileProvider),
                           const SizedBox(
                             height: 12,
                           ),
@@ -193,7 +186,7 @@ class _ProductPageState extends State<ProductPage> {
                             'Product Description',
                             weight: FontWeight.w800,
                           ),
-                          TextWidget(widget.productDetails["description"] ?? "",
+                          TextWidget(widget.product.description,
                               flow: TextOverflow.visible),
                           const SizedBox(
                             height: 12,
@@ -204,11 +197,11 @@ class _ProductPageState extends State<ProductPage> {
                             size: 18,
                           ),
                           TextWidget(
-                            'Farmer Name: ${capitalize(widget.productDetails["seller_name"] ?? "")}',
+                            'Farmer Name: ${capitalize(widget.product.seller.name)}',
                             weight: FontWeight.w500,
                           ),
                           TextWidget(
-                            'Location : ${widget.productDetails["place"] ?? "Visakhapatnam"}',
+                            'Location : ${widget.product.seller.location}',
                             weight: FontWeight.w500,
                           ),
                           Row(
@@ -218,8 +211,7 @@ class _ProductPageState extends State<ProductPage> {
                                 weight: FontWeight.w500,
                               ),
                               TextWidget(
-                                widget.productDetails["seller_certificate"] ??
-                                    "",
+                                widget.product.seller.certificate.name,
                                 weight: FontWeight.w500,
                                 color: Theme.of(context).colorScheme.primary,
                               ),
@@ -229,7 +221,7 @@ class _ProductPageState extends State<ProductPage> {
                             height: 12,
                           ),
                           moreFarmerProducts(
-                              productProvider, widget.productDetails),
+                              productProvider, widget.product),
                         ],
                       ),
                     ),

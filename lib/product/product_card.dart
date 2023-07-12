@@ -33,7 +33,7 @@ class ProductCard extends StatefulWidget {
   final String imageURL;
   final double price;
   final String units;
-  final String verify;
+  final bool verify;
   final String? poster;
   final String location;
   final bool includeHorizontalPadding;
@@ -79,8 +79,8 @@ class _ProductCardState extends State<ProductCard> {
                   Provider.of(context, listen: false);
               Navigator.of(context).push(MaterialPageRoute(
                   builder: (context) => ProductPage(
-                        productDetails: productProvider.products
-                            .where((e) => e["product_id"] == widget.productId)
+                        product: productProvider.products
+                            .where((e) => e.productId.toString() == widget.productId)
                             .first,
                       )));
             }
@@ -160,7 +160,7 @@ class _ProductCardState extends State<ProductCard> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
-                                  widget.verify == "1"
+                                  widget.verify
                                       ? productProvider.cart
                                               .where((e) =>
                                                   e["product_id"] ==

@@ -12,12 +12,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart';
 import 'package:intl/intl.dart';
+import 'package:nandikrushi_farmer/domain/entity/product.dart';
 import 'package:nandikrushi_farmer/nav_items/profile_provider.dart';
 import 'package:nandikrushi_farmer/reusable_widgets/elevated_button.dart';
 import 'package:nandikrushi_farmer/reusable_widgets/snackbar.dart';
 import 'package:nandikrushi_farmer/reusable_widgets/text_widget.dart';
 import 'package:nandikrushi_farmer/utils/login_utils.dart';
 
+import '../data/models/product_model.dart';
 import '../utils/server.dart';
 
 class ProductProvider extends ChangeNotifier {
@@ -76,12 +78,12 @@ class ProductProvider extends ChangeNotifier {
   };
 
   List<Map<String, String>> cart = [];
-  List<Map<String, String>> products = [];
+  List<Product> products = [];
   List<Map<String, String>> myProducts = [];
   List<Map<String, dynamic>> orders = [];
   List<Map<String, dynamic>> myPurchases = [];
   List<Map<String, String>> coupons = [];
-  Map<String, List<Map<String, String>>> categorizedProducts = {};
+  Map<String, List<Product>> categorizedProducts = {};
   Map<String, String> appliedCoupon = {};
   String myProductsMessage = "Oops!";
   bool deliverySlot = false;
@@ -469,95 +471,16 @@ class ProductProvider extends ChangeNotifier {
                   element.value ==
                   int.tryParse(e["category"][0]["category_id"] ?? "-1"))
               .isNotEmpty) {
-            log("331" + e.toString());
-            // var locationGeoCoded = await placemarkFromCoordinates(
-            //     !e["vendor_details"][0]["location"]["lagtitude"]
-            //             .toString()
-            //             .contains("0.0")
-            //         ? double.tryParse(e["vendor_details"][0]["location"]
-            //                     ["lagtitude"]
-            //                 .toString()) ??
-            //             17.7003844
-            //         : 17.7003844,
-            //     !e["vendor_details"][0]["location"]["latitude"]
-            //             .toString()
-            //             .contains("0.0")
-            //         ? double.tryParse(e["vendor_details"][0]["location"]
-            //                     ["latitude"]
-            //                 .toString()) ??
-            //             83.1016542
-            //         : 83.1016542);
+            var product = ProductModel.fromJson(e, allCategories).toEntity();
+                
+              // 'customer_ratings': jsonEncode(e["Products"][0]["rating"]),
+            //TODO Replace sellerID with actual data and certificate and add reviews
 
-            //print("${e["Products"][0]["product_name"]} - $locationGeoCoded");
+            
+            
 
-            var element = {
-              'name': e["Products"][0]["product_name"].toString(),
-              'description': e["Products"][0]["description"].toString(),
-              'price': (((double.tryParse(e["Products"][0]["final_price"]
-                                      .toString()) ??
-                                  0.0) *
-                              100)
-                          .roundToDouble() /
-                      100)
-                  .toString(),
-              "quantity": e["Products"][0]["quantity"].toString(),
-              "verify_seller": e["Products"][0]["verify_seller"].toString(),
-              "category_id": allCategories.entries
-                  .where((element) =>
-                      element.value ==
-                      int.tryParse(e["category"][0]["category_id"] ?? "-1"))
-                  .first
-                  .key,
-              'product_id': e["Products"][0]["product_id"].toString(),
-              'units':
-                  '${e["Products"][0]["min_purchase"]} ${e["Products"][0]["units"]}'
-                      .toString(),
-              'place':
-                  "${e["vendor_details"][0]["location"]["mandal"]}, ${e["vendor_details"][0]["location"]["district"]}",
-              'url': Uri.tryParse(e["Products"][0]["image"].toString())
-                          ?.host
-                          .isNotEmpty ??
-                      false
-                  ? e["Products"][0]["image"].toString()
-                  : "http://images.jdmagicbox.com/comp/visakhapatnam/q2/0891px891.x891.180329082226.k1q2/catalogue/nandi-krushi-visakhapatnam-e-commerce-service-providers-aomg9cai5i-250.jpg",
-              'seller_name':
-                  (e["vendor_details"][0]["name"] ?? "Farmer").toString(),
-              'seller_mobile':
-                  (e["vendor_details"][0]["mobile"] ?? "8341980196").toString(),
-              'seller_email':
-                  (e["vendor_details"][0]["email"] ?? "info@spotmies.com")
-                      .toString(),
-              'seller_place':
-                  "${e["vendor_details"][0]["location"]["mandal"]}, ${e["vendor_details"][0]["location"]["district"]}",
-              'seller_certificate': (e["vendor_details"][0]["certificates"] ??
-                      "Organic Certification")
-                  .toString(),
-              'rating': (((double.tryParse(e["Products"][0]["aggregateRating"]
-                                      .toString()) ??
-                                  0) *
-                              2)
-                          .round() /
-                      2)
-                  .toString(),
-              'customer_ratings': jsonEncode(e["Products"][0]["rating"]),
-            };
-
-            if (!e["vendor_details"][0]["location"]["longitude"]
-                    .toString()
-                    .contains("0.0") &&
-                !e["vendor_details"][0]["location"]["latitude"]
-                    .toString()
-                    .contains("0.0") &&
-                e["vendor_details"][0]["location"]["longitude"] != null &&
-                e["vendor_details"][0]["location"]["latitude"] != null) {
-              element.addAll({
-                "longitude": e["vendor_details"][0]["location"]["longitude"],
-                "latitude": e["vendor_details"][0]["location"]["latitude"],
-              });
-            }
-
-            log("12Prod->$element ,; $e");
-            products.add(element);
+            log("12Prod->$product ,; $e");
+            products.add(product);
           }
         }
         products = products.toSet().toList();
@@ -565,7 +488,7 @@ class ProductProvider extends ChangeNotifier {
         for (var element in allCategories.keys) {
           categorizedProducts[element] = [];
           for (var product in products) {
-            if (product["category_id"] == element) {
+            if (product.category == element) {
               categorizedProducts[element]?.add(product);
             }
           }
@@ -635,58 +558,54 @@ class ProductProvider extends ChangeNotifier {
                 in (element["product_details"] as List<dynamic>)) {
               // if (products
               //     .where((e) =>
-              //         e["product_id"] == productOrderDetails["product_id"])
+              //         e.productId == productOrderDetails["product_id"])
               //     .isNotEmpty) {
               (orderData["products"]).add({
                 "product_name": productOrderDetails["product_name"],
                 "description": products
                         .where((e) =>
-                            e["product_id"] ==
+                            e.productId ==
                             productOrderDetails["product_id"])
                         .isNotEmpty
                     ? products
                         .where((e) =>
-                            e["product_id"] ==
+                            e.productId ==
                             productOrderDetails["product_id"])
-                        .first["description"]
-                        .toString()
+                        .first.description
                     : (productOrderDetails["description"] ??
                         "Nandikrushi products are organic and fresh"),
                 "url": products
                             .where((e) =>
-                                e["product_id"] ==
+                                e.productId ==
                                 productOrderDetails["product_id"])
                             .isNotEmpty &&
                         (Uri.tryParse(products
                                     .where((e) =>
-                                        e["product_id"] ==
+                                        e.productId ==
                                         productOrderDetails["product_id"])
-                                    .first["url"]
-                                    .toString())
+                                    .first.image)
                                 ?.host
                                 .isNotEmpty ??
                             false)
                     ? products
                         .where((e) =>
-                            e["product_id"] ==
+                            e.productId ==
                             productOrderDetails["product_id"])
-                        .first["url"]
-                        .toString()
+                        .first.image
                     : "http://images.jdmagicbox.com/comp/visakhapatnam/q2/0891px891.x891.180329082226.k1q2/catalogue/nandi-krushi-visakhapatnam-e-commerce-service-providers-aomg9cai5i-250.jpg",
                 "price": productOrderDetails["price"],
                 "product_id": productOrderDetails["product_id"],
                 "quantity": productOrderDetails["quantity"],
                 "units": products
                         .where((e) =>
-                            e["product_id"] ==
+                            e.productId ==
                             productOrderDetails["product_id"])
                         .isNotEmpty
                     ? products
                         .where((e) =>
-                            e["product_id"] ==
+                            e.productId ==
                             productOrderDetails["product_id"])
-                        .first["units"]
-                        .toString()
+                        .first.units
                     : "units",
                 "place": element["shipping_details"][0]["shipping_city"],
               });
@@ -787,7 +706,7 @@ class ProductProvider extends ChangeNotifier {
               //     "The rating of the product you've purchased: ${}");
               // if (products
               //     .where((e) =>
-              //         e["product_id"] == productOrderDetails["product_id"])
+              //         e.productId == productOrderDetails["product_id"])
               //     .isNotEmpty) {
               (myPurchasesData["products"]).add({
                 "product_name": productOrderDetails["product_name"],
@@ -797,52 +716,48 @@ class ProductProvider extends ChangeNotifier {
                     ["delivery_time"],
                 "description": products
                         .where((e) =>
-                            e["product_id"] ==
+                            e.productId ==
                             productOrderDetails["product_id"])
                         .isNotEmpty
                     ? products
                         .where((e) =>
-                            e["product_id"] ==
+                            e.productId ==
                             productOrderDetails["product_id"])
-                        .first["description"]
-                        .toString()
+                        .first.description
                     : (productOrderDetails["description"] ??
                         "Nandikrushi products are organic and fresh"),
                 "url": products
                             .where((e) =>
-                                e["product_id"] ==
+                                e.productId ==
                                 productOrderDetails["product_id"])
                             .isNotEmpty &&
                         (Uri.tryParse(products
                                     .where((e) =>
-                                        e["product_id"] ==
+                                        e.productId ==
                                         productOrderDetails["product_id"])
-                                    .first["url"]
-                                    .toString())
+                                    .first.image)
                                 ?.host
                                 .isNotEmpty ??
                             false)
                     ? products
                         .where((e) =>
-                            e["product_id"] ==
+                            e.productId ==
                             productOrderDetails["product_id"])
-                        .first["url"]
-                        .toString()
+                        .first.image
                     : "http://images.jdmagicbox.com/comp/visakhapatnam/q2/0891px891.x891.180329082226.k1q2/catalogue/nandi-krushi-visakhapatnam-e-commerce-service-providers-aomg9cai5i-250.jpg",
                 "price": productOrderDetails["price"],
                 "product_id": productOrderDetails["product_id"],
                 "quantity": productOrderDetails["quantity"],
                 "units": products
                         .where((e) =>
-                            e["product_id"] ==
+                            e.productId ==
                             productOrderDetails["product_id"])
                         .isNotEmpty
                     ? products
                         .where((e) =>
-                            e["product_id"] ==
+                            e.productId ==
                             productOrderDetails["product_id"])
-                        .first["units"]
-                        .toString()
+                        .first.units
                     : "units",
                 "payment_method": element["payment_details"][0]
                     ["payment_method"],
@@ -868,15 +783,14 @@ class ProductProvider extends ChangeNotifier {
                 "telephone": element["customer_details"][0]["telephone"],
                 "rating": products
                         .where((e) =>
-                            e["product_id"] ==
+                            e.productId ==
                             productOrderDetails["product_id"])
                         .isNotEmpty
                     ? products
                         .where((e) =>
-                            e["product_id"] ==
+                            e.productId ==
                             productOrderDetails["product_id"])
-                        .first["rating"]
-                        .toString()
+                        .first.aggregateRating
                     : "3.5"
               });
               // }
@@ -966,31 +880,31 @@ class ProductProvider extends ChangeNotifier {
           cart = cartJSONResponse.where((cartItem) {
             return products
                 .where((element) =>
-                    element["product_id"] ==
+                    element.productId.toString() ==
                     (cartItem["product_id"].toString()))
                 .isNotEmpty;
           }).map((cartItem) {
             var productCartItem = products
                 .where((element) =>
-                    element["product_id"] ==
+                    element.productId.toString() ==
                     (cartItem["product_id"].toString()))
                 .first;
             return {
               "cart_id": cartItem["cart_id"].toString(),
-              "name": productCartItem["name"].toString(),
-              'unit': productCartItem["units"].toString(),
+              "name": productCartItem.name.toString(),
+              'unit': productCartItem.units.toString(),
               "product_id": cartItem["product_id"].toString(),
               "quantity": cartItem['quantity'].toString(),
-              'price': productCartItem['price']
+              'price': productCartItem.price
                   .toString()
                   .replaceFirst("\$", "")
                   .toString(),
-              'place': productCartItem["place"].toString(),
-              'url': (Uri.tryParse(productCartItem["url"].toString())
+              'place': productCartItem.produceLocation.toString(),
+              'url': (Uri.tryParse(productCartItem.image.toString())
                           ?.host
                           .isNotEmpty ??
                       false)
-                  ? productCartItem["url"].toString()
+                  ? productCartItem.image.toString()
                   : "http://images.jdmagicbox.com/comp/visakhapatnam/q2/0891px891.x891.180329082226.k1q2/catalogue/nandi-krushi-visakhapatnam-e-commerce-service-providers-aomg9cai5i-250.jpg",
             };
           }).toList();
@@ -1254,9 +1168,9 @@ class ProductProvider extends ChangeNotifier {
       required Function(String) showMessage,
       required ProfileProvider profileProvider}) async {
     var productDetails =
-        products.where((e) => e["product_id"] == productID).first;
+        products.where((e) => e.productId.toString() == productID).first;
     var initialCartIems = int.tryParse(cart
-                .where((e) => e["product_id"] == productDetails["product_id"])
+                .where((e) => e["product_id"] == productDetails.productId.toString())
                 .first["quantity"] ??
             "0") ??
         0;
@@ -1278,31 +1192,31 @@ class ProductProvider extends ChangeNotifier {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          productDetails["name"] ?? "Product Name",
+                          productDetails.name ?? "Product Name",
                           style: Theme.of(context).textTheme.titleLarge,
                         ),
                         Text(
-                          productDetails["category_id"] ?? "Category",
+                          productDetails.category ?? "Category",
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
-                        productDetails["description"] != null
+                        productDetails.description != null
                             ? SizedBox(
                                 width: double.infinity,
                                 child: TextWidget(
-                                  productDetails["description"],
+                                  productDetails.description,
                                   flow: TextOverflow.ellipsis,
                                 ),
                               )
                             : const SizedBox(),
                         TextWidget(
-                            "Rs. ${double.tryParse(productDetails["price"] ?? "")?.toStringAsFixed(2) ?? ""}"),
-                        TextWidget(productDetails["units"] ?? "1 unit"),
+                            "Rs. ${productDetails.price.toStringAsFixed(2)}"),
+                        TextWidget(productDetails.units ?? "1 unit"),
                         Row(
                           children: [
                             const Icon(Icons.location_on_rounded),
                             Expanded(
                               child: TextWidget(
-                                productDetails["place"] ?? "Visakhapatnam",
+                                productDetails.produceLocation ?? "Visakhapatnam",
                                 size: 12,
                               ),
                             ),
@@ -1450,7 +1364,7 @@ class ProductProvider extends ChangeNotifier {
                   ),
                   Expanded(
                     child: Image.network(
-                      productDetails["url"] ?? "",
+                      productDetails.image ?? "",
                     ),
                   ),
                 ],

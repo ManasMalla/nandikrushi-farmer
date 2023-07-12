@@ -36,7 +36,7 @@ class _SearchScreenState extends State<SearchScreen>
             .where((element) => searchController.text.isNotEmpty
                 ? element.value
                     .where((element1) =>
-                        element1["name"]
+                        element1.name
                             ?.toLowerCase()
                             .contains(searchController.text.toLowerCase()) ??
                         true)
@@ -49,7 +49,7 @@ class _SearchScreenState extends State<SearchScreen>
                     .where((element) => searchController.text.isNotEmpty
                         ? element.value
                             .where((element1) =>
-                                element1["name"]?.toLowerCase().contains(
+                                element1.name?.toLowerCase().contains(
                                     searchController.text.toLowerCase()) ??
                                 true)
                             .isNotEmpty
@@ -171,8 +171,7 @@ class _SearchScreenState extends State<SearchScreen>
                                                 .text.isNotEmpty
                                             ? element.value
                                                 .where((element1) =>
-                                                    element1["name"]
-                                                        ?.toLowerCase()
+                                                    element1.name.toLowerCase()
                                                         .contains(searchController
                                                             .text
                                                             .toLowerCase()) ??
@@ -187,7 +186,7 @@ class _SearchScreenState extends State<SearchScreen>
                                         searchController.text.isNotEmpty
                                             ? element.value
                                                 .where((element1) =>
-                                                    element1["name"]?.toLowerCase().contains(searchController.text.toLowerCase()) ?? true)
+                                                    element1.name.toLowerCase().contains(searchController.text.toLowerCase()) ?? true)
                                                 .isNotEmpty
                                             : element.value.isNotEmpty)
                                     .toList()[index]
@@ -221,7 +220,7 @@ class _SearchScreenState extends State<SearchScreen>
                                                 .text.isNotEmpty
                                             ? element.value
                                                 .where((element1) =>
-                                                    element1["name"]
+                                                    element1.name
                                                         ?.toLowerCase()
                                                         .contains(searchController
                                                             .text
@@ -236,7 +235,7 @@ class _SearchScreenState extends State<SearchScreen>
                                     .where((element) => searchController.text.isNotEmpty
                                         ? element.value
                                             .where((element1) =>
-                                                element1["name"]?.toLowerCase().contains(searchController.text.toLowerCase()) ?? true)
+                                                element1.name?.toLowerCase().contains(searchController.text.toLowerCase()) ?? true)
                                             .isNotEmpty
                                         : element.value.isNotEmpty)
                                     .toList()[_controller.index]
@@ -262,7 +261,7 @@ class _SearchScreenState extends State<SearchScreen>
                                               .text.isNotEmpty
                                           ? element.value
                                               .where((element1) =>
-                                                  element1["name"]
+                                                  element1.name
                                                       ?.toLowerCase()
                                                       .contains(searchController
                                                           .text
@@ -281,7 +280,7 @@ class _SearchScreenState extends State<SearchScreen>
                                                           .text.isNotEmpty
                                                       ? element.value
                                                           .where((element1) =>
-                                                              element1["name"]
+                                                              element1.name
                                                                   ?.toLowerCase()
                                                                   .contains(
                                                                       searchController
@@ -292,7 +291,7 @@ class _SearchScreenState extends State<SearchScreen>
                                                       : element.value.isNotEmpty)
                                                   .toList()[tabIndex]
                                                   .key]
-                                              ?.where((element) => element["name"]?.toLowerCase().contains(searchController.text.toLowerCase()) ?? true)
+                                              ?.where((element) => element.name?.toLowerCase().contains(searchController.text.toLowerCase()) ?? true)
                                               .toList()[index];
                                           log("283");
                                           log(product.toString());
@@ -301,43 +300,39 @@ class _SearchScreenState extends State<SearchScreen>
                                             children: [
                                               Opacity(
                                                 opacity:
-                                                    product?["quantity"] == "0"
+                                                    product?.quantity == 0
                                                         ? 0.2
                                                         : 1.0,
                                                 child: ProductCard(
-                                                    sellerMail: product?[
-                                                        "seller_email"],
-                                                    sellerMobile: product?[
-                                                        "seller_mobile"],
+                                                    sellerMail: product?.seller.email,
+                                                    sellerMobile: product?.seller.phoneNumber,
                                                     type: CardType.product,
-                                                    verify: product?["verify_seller"] ??
-                                                        "0",
+                                                    verify: product?.canBeSold ?? false,
                                                     productId:
-                                                        product?["product_id"] ??
-                                                            "XYZ",
+                                                        product?.productId.toString()?? "XYZ",
                                                     productName:
-                                                        product?["name"] ??
+                                                        product?.name ??
                                                             "Name",
                                                     productDescription:
-                                                        product?["description"] ??
+                                                        product?.description ??
                                                             "Description",
-                                                    imageURL: product?["url"] ??
+                                                    imageURL: product?.image ??
                                                         "https://img.etimg.com/thumb/msid-64411656,width-640,resizemode-4,imgsize-226493/cow-milk.jpg",
                                                     price: double.tryParse(
-                                                            product?["price"] ??
+                                                            product?.price.toString() ??
                                                                 "00.00") ??
                                                         00.00,
-                                                    units: product?["units"] ??
+                                                    units: product?.units ??
                                                         "1 unit",
                                                     location:
-                                                        product?["place"] ??
+                                                        product?.produceLocation ??
                                                             "Visakhapatnam"),
                                               ),
                                               Positioned(
                                                   // bottom: 50,
                                                   // right: 60,
-                                                  child: product?["quantity"] ==
-                                                          "0"
+                                                  child: product?.quantity ==
+                                                          0
                                                       ? Text(
                                                           "This product is temporarily unavailable",
                                                           style:
@@ -366,14 +361,14 @@ class _SearchScreenState extends State<SearchScreen>
                                                         .text.isNotEmpty
                                                     ? element.value
                                                         .where((element1) =>
-                                                            element1["name"]?.toLowerCase().contains(searchController.text.toLowerCase()) ??
+                                                            element1.name?.toLowerCase().contains(searchController.text.toLowerCase()) ??
                                                             true)
                                                         .isNotEmpty
                                                     : element.value.isNotEmpty)
                                                 .toList()[tabIndex]
                                                 .key]
                                             ?.where((element) =>
-                                                element["name"]
+                                                element.name
                                                     ?.toLowerCase()
                                                     .contains(searchController.text.toLowerCase()) ??
                                                 true)
@@ -457,13 +452,12 @@ class _MapsContainerState extends State<MapsContainer>
       _setMapStyle();
     });
     sellerPins = widget.productProvider.products
-        .where((e) => e["latitude"] != null && e["longitude"] != null)
+        .where((e) => e.produceCoordinates != null)
         .map((e) => Marker(
-              markerId: MarkerId(e["seller_name"].toString()),
-              position: LatLng(double.tryParse(e["longitude"]!)!,
-                  double.tryParse(e["latitude"]!)!),
+              markerId: MarkerId(e.seller.name.toString()),
+              position: LatLng(e.produceCoordinates!.longitude, e.produceCoordinates!.latitude),
               infoWindow: InfoWindow(
-                title: e["seller_name"].toString(),
+                title: e.seller.name.toString(),
                 snippet: "Fresh Veggies from here",
               ),
             ))

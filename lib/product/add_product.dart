@@ -598,8 +598,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                                                   ? "Weekly Basket"
                                                                   : productProvider
                                                                       .products
-                                                                      .where((element) => element["product_id"].toString() == selectedIngredients.keys.first)
-                                                                      .first["category_id"]),
+                                                                      .where((element) => element.productId.toString() == selectedIngredients.keys.first)
+                                                                      .first.category),
                                                           items: selectedIngredients.isEmpty || selectedIngredients.length > 1
                                                               ? productProvider.categories.keys
                                                                   .map((e) => DropdownMenuItem(
@@ -619,14 +619,14 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                                                     value: productProvider
                                                                         .products
                                                                         .where((element) =>
-                                                                            element["product_id"].toString() ==
+                                                                            element.productId.toString() ==
                                                                             selectedIngredients.keys.first)
-                                                                        .first["category_id"],
+                                                                        .first.category,
                                                                     child: Text(
                                                                       productProvider
                                                                               .products
-                                                                              .where((element) => element["product_id"].toString() == selectedIngredients.keys.first)
-                                                                              .first["category_id"] ??
+                                                                              .where((element) => element.productId.toString() == selectedIngredients.keys.first)
+                                                                              .first.category ??
                                                                           "Weekly Basket",
                                                                       style: Theme.of(
                                                                               context)

@@ -315,7 +315,7 @@ class MyProductsPage extends StatelessWidget {
                                 profileProvider.hideLoader();
                                 log("123");
                               },
-                              verify: product["verify_seller"] ?? "0",
+                              verify: product["verify_seller"] == "1",
                               type: CardType.myProducts,
                               productId: product["product_id"] ?? "XYZ",
                               productName: product["product_name"] ?? "Name",
