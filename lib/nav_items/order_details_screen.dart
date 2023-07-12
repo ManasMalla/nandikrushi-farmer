@@ -30,7 +30,6 @@ class OrderDetailScreen extends StatefulWidget {
 class _OrderDetailScreenState extends State<OrderDetailScreen> {
   @override
   Widget build(BuildContext context) {
-    var currentStep = 1;
 
     return LayoutBuilder(builder: (context, constraints) {
       height(context) {
@@ -95,6 +94,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                   [0]["order_status_id"] ==
                               "7"
                           ? Stepper(
+                            physics: NeverScrollableScrollPhysics(),
                               steps: [
                                 Step(
                                     title: const TextWidget(
@@ -120,8 +120,10 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                                   255, 192, 183, 147),
                                               letterSpacing: 2.5),
                                     ),
-                                    isActive: currentStep > 0,
-                                    state: currentStep > 0
+                                    isActive: (int.tryParse(productProvider.myPurchases[widget.index]["products"]
+                                  [0]["order_status_id"]) ?? 0) > 0,
+                                    state: (int.tryParse(productProvider.myPurchases[widget.index]["products"]
+                                  [0]["order_status_id"]) ?? 0) > 0
                                         ? StepState.complete
                                         : StepState.indexed),
                                 const Step(
@@ -144,7 +146,6 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                   width: 0,
                                 );
                               },
-                              currentStep: currentStep,
                             )
                           : Stepper(
                               steps: [
@@ -172,8 +173,10 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                                   255, 192, 183, 147),
                                               letterSpacing: 2.5),
                                     ),
-                                    isActive: currentStep > 0,
-                                    state: currentStep > 0
+                                    isActive: (int.tryParse(productProvider.myPurchases[widget.index]["products"]
+                                  [0]["order_status_id"]) ?? 0) > 0,
+                                    state: (int.tryParse(productProvider.myPurchases[widget.index]["products"]
+                                  [0]["order_status_id"]) ?? 0) > 0
                                         ? StepState.complete
                                         : StepState.indexed),
                                 Step(
@@ -182,8 +185,10 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                       weight: FontWeight.bold,
                                     ),
                                     content: const SizedBox(),
-                                    isActive: currentStep > 1,
-                                    state: currentStep > 1
+                                    isActive: (int.tryParse(productProvider.myPurchases[widget.index]["products"]
+                                  [0]["order_status_id"]) ?? 0) > 1,
+                                    state: (int.tryParse(productProvider.myPurchases[widget.index]["products"]
+                                  [0]["order_status_id"]) ?? 0) > 1
                                         ? StepState.complete
                                         : StepState.indexed),
                                 Step(
@@ -192,8 +197,10 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                       weight: FontWeight.bold,
                                     ),
                                     content: const SizedBox(),
-                                    isActive: currentStep > 2,
-                                    state: currentStep > 2
+                                    isActive: (int.tryParse(productProvider.myPurchases[widget.index]["products"]
+                                  [0]["order_status_id"]) ?? 0) > 2,
+                                    state: (int.tryParse(productProvider.myPurchases[widget.index]["products"]
+                                  [0]["order_status_id"]) ?? 0) > 2
                                         ? StepState.complete
                                         : StepState.indexed),
                                 Step(
@@ -202,8 +209,10 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                       weight: FontWeight.bold,
                                     ),
                                     content: const SizedBox(),
-                                    isActive: currentStep > 3,
-                                    state: currentStep > 3
+                                    isActive: (int.tryParse(productProvider.myPurchases[widget.index]["products"]
+                                  [0]["order_status_id"]) ?? 0) > 3,
+                                    state: (int.tryParse(productProvider.myPurchases[widget.index]["products"]
+                                  [0]["order_status_id"]) ?? 0) > 3
                                         ? StepState.complete
                                         : StepState.indexed),
                               ],
@@ -213,7 +222,6 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                   width: 0,
                                 );
                               },
-                              currentStep: currentStep,
                             ),
                     ),
                     Padding(
