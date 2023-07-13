@@ -304,8 +304,8 @@ class _SearchScreenState extends State<SearchScreen>
                                                         ? 0.2
                                                         : 1.0,
                                                 child: ProductCard(
-                                                    sellerMail: product?.seller.email,
-                                                    sellerMobile: product?.seller.phoneNumber,
+                                                    sellerMail: product?.seller?.email,
+                                                    sellerMobile: product?.seller?.phoneNumber,
                                                     type: CardType.product,
                                                     verify: product?.canBeSold ?? false,
                                                     productId:
@@ -454,10 +454,10 @@ class _MapsContainerState extends State<MapsContainer>
     sellerPins = widget.productProvider.products
         .where((e) => e.produceCoordinates != null)
         .map((e) => Marker(
-              markerId: MarkerId(e.seller.name.toString()),
+              markerId: MarkerId(e.seller?.name.toString() ?? ""),
               position: LatLng(e.produceCoordinates!.longitude, e.produceCoordinates!.latitude),
               infoWindow: InfoWindow(
-                title: e.seller.name.toString(),
+                title: e.seller?.name.toString(),
                 snippet: "Fresh Veggies from here",
               ),
             ))

@@ -23,7 +23,7 @@ class Product extends Equatable {
   final int categoryId;
   final String produceLocation;
   final LatLng? produceCoordinates;
-  final Seller seller;
+  final Seller? seller;
   final double aggregateRating;
   final List<CustomerReview> reviews;
 
@@ -40,7 +40,7 @@ class Product extends Equatable {
     required this.categoryId,
     required this.produceLocation,
     this.produceCoordinates,
-    required this.seller,
+    this.seller,
     required this.aggregateRating,
     required this.reviews
   }): assert( Uri.tryParse(image)

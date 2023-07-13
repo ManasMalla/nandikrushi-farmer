@@ -197,11 +197,11 @@ class _ProductPageState extends State<ProductPage> {
                             size: 18,
                           ),
                           TextWidget(
-                            'Farmer Name: ${capitalize(widget.product.seller.name)}',
+                            'Farmer Name: ${capitalize(widget.product.seller?.name ?? "")}',
                             weight: FontWeight.w500,
                           ),
                           TextWidget(
-                            'Location : ${widget.product.seller.location}',
+                            'Location : ${widget.product.seller?.location}',
                             weight: FontWeight.w500,
                           ),
                           Row(
@@ -211,7 +211,7 @@ class _ProductPageState extends State<ProductPage> {
                                 weight: FontWeight.w500,
                               ),
                               TextWidget(
-                                widget.product.seller.certificate.name,
+                                widget.product.seller?.certificate.name ?? "",
                                 weight: FontWeight.w500,
                                 color: Theme.of(context).colorScheme.primary,
                               ),

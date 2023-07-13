@@ -193,7 +193,7 @@ class _MyPurchasesScreenState extends State<MyPurchasesScreen> {
                             var product = productProvider.myPurchases[itemIndex]
                                 ["products"][productOrderIndex];
                             return ProductCard(
-                              verify: product["verify_seller"] ?? "0",
+                              verify: product["verify_seller"] == "1",
                               canTap: false,
                               type: CardType.myPurchases,
                               productId: product["product_id"] ?? "XYZ",

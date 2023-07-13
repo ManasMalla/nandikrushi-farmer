@@ -20,6 +20,7 @@ import 'package:nandikrushi_farmer/reusable_widgets/text_widget.dart';
 import 'package:nandikrushi_farmer/utils/login_utils.dart';
 
 import '../data/models/product_model.dart';
+import '../domain/entity/order_product.dart';
 import '../utils/server.dart';
 
 class ProductProvider extends ChangeNotifier {
@@ -81,7 +82,7 @@ class ProductProvider extends ChangeNotifier {
   List<Product> products = [];
   List<Map<String, String>> myProducts = [];
   List<Map<String, dynamic>> orders = [];
-  List<Map<String, dynamic>> myPurchases = [];
+  List<ProductOrder> myPurchases = [];
   List<Map<String, String>> coupons = [];
   Map<String, List<Product>> categorizedProducts = {};
   Map<String, String> appliedCoupon = {};
@@ -473,12 +474,6 @@ class ProductProvider extends ChangeNotifier {
               .isNotEmpty) {
             var product = ProductModel.fromJson(e, allCategories).toEntity();
                 
-              // 'customer_ratings': jsonEncode(e["Products"][0]["rating"]),
-            //TODO Replace sellerID with actual data and certificate and add reviews
-
-            
-            
-
             log("12Prod->$product ,; $e");
             products.add(product);
           }
@@ -556,10 +551,7 @@ class ProductProvider extends ChangeNotifier {
             orderData["products"] = [];
             for (var productOrderDetails
                 in (element["product_details"] as List<dynamic>)) {
-              // if (products
-              //     .where((e) =>
-              //         e.productId == productOrderDetails["product_id"])
-              //     .isNotEmpty) {
+              // var product = Produ
               (orderData["products"]).add({
                 "product_name": productOrderDetails["product_name"],
                 "description": products
@@ -699,22 +691,9 @@ class ProductProvider extends ChangeNotifier {
               jsonDecode(myPurchasesData.body)["order"];
           for (var element in myPurchasesJSONResponse) {
             var myPurchasesData = {"order_id": element["order_id"]};
-            myPurchasesData["products"] = [];
             for (var productOrderDetails
                 in (element["product_details"] as List<dynamic>)) {
-              // print(
-              //     "The rating of the product you've purchased: ${}");
-              // if (products
-              //     .where((e) =>
-              //         e.productId == productOrderDetails["product_id"])
-              //     .isNotEmpty) {
-              (myPurchasesData["products"]).add({
-                "product_name": productOrderDetails["product_name"],
-                "order_status_id": element["order_status_id"],
-                "order_status": element["order_status"],
-                "delivery_time": element["delivery_details"][0]
-                    ["delivery_time"],
-                "description": products
+                  var orderProduct = ProductModel(productId: productOrderDetails["product_id"], name: productOrderDetails["product_name"], description: products
                         .where((e) =>
                             e.productId ==
                             productOrderDetails["product_id"])
@@ -725,8 +704,7 @@ class ProductProvider extends ChangeNotifier {
                             productOrderDetails["product_id"])
                         .first.description
                     : (productOrderDetails["description"] ??
-                        "Nandikrushi products are organic and fresh"),
-                "url": products
+                        "Nandikrushi products are organic and fresh"), image:  products
                             .where((e) =>
                                 e.productId ==
                                 productOrderDetails["product_id"])
@@ -745,10 +723,9 @@ class ProductProvider extends ChangeNotifier {
                             productOrderDetails["product_id"])
                         .first.image
                     : "http://images.jdmagicbox.com/comp/visakhapatnam/q2/0891px891.x891.180329082226.k1q2/catalogue/nandi-krushi-visakhapatnam-e-commerce-service-providers-aomg9cai5i-250.jpg",
-                "price": productOrderDetails["price"],
-                "product_id": productOrderDetails["product_id"],
-                "quantity": productOrderDetails["quantity"],
-                "units": products
+                price: productOrderDetails["price"],
+                quantity: productOrderDetails["quantity"],
+                units: products
                         .where((e) =>
                             e.productId ==
                             productOrderDetails["product_id"])
@@ -759,6 +736,24 @@ class ProductProvider extends ChangeNotifier {
                             productOrderDetails["product_id"])
                         .first.units
                     : "units",
+                    canBeSold: true,
+                    aggregateRating: products
+                        .where((e) =>
+                            e.productId ==
+                            productOrderDetails["product_id"])
+                        .isNotEmpty
+                    ? products
+                        .where((e) =>
+                            e.productId ==
+                            productOrderDetails["product_id"])
+                        .first.aggregateRating
+                    : 3.5,
+                );
+              (myPurchasesData["products"]).add({
+                "order_status_id": element["order_status_id"],
+                "order_status": element["order_status"],
+                "delivery_time": element["delivery_details"][0]
+                    ["delivery_time"],
                 "payment_method": element["payment_details"][0]
                     ["payment_method"],
                 "place": element["shipping_details"][0]["shipping_city"],
@@ -781,17 +776,7 @@ class ProductProvider extends ChangeNotifier {
                 "shipping_zone": element["shipping_details"][0]
                     ["shipping_zone"],
                 "telephone": element["customer_details"][0]["telephone"],
-                "rating": products
-                        .where((e) =>
-                            e.productId ==
-                            productOrderDetails["product_id"])
-                        .isNotEmpty
-                    ? products
-                        .where((e) =>
-                            e.productId ==
-                            productOrderDetails["product_id"])
-                        .first.aggregateRating
-                    : "3.5"
+                "rating": 
               });
               // }
             }
