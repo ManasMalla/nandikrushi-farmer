@@ -38,7 +38,8 @@ showAddressesBottomSheet(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.background,
-                      borderRadius: BorderRadius.circular(16)),
+                      borderRadius:
+                          BorderRadius.vertical(top: Radius.circular(16))),
                   child: profileProvider.userAddresses.isEmpty
                       ? Center(
                           child: Padding(
@@ -135,18 +136,18 @@ showAddressesBottomSheet(
                                   log(item.toString());
                                   return InkWell(
                                     onTap: () {
-                                      // isOrderWorkflow
-                                      //     ? Navigator.of(context).push(
-                                      //         MaterialPageRoute(
-                                      //             builder: (context) =>
-                                      //                 ConfirmOrderScreen(
-                                      //                   addressID: profileProvider
-                                      //                                   .userAddresses[
-                                      //                               item][
-                                      //                           "address_id"] ??
-                                      //                       "",
-                                      //                 )))
-                                      //     : () {};
+                                      isOrderWorkflow
+                                          ? Navigator.of(context).push(
+                                              MaterialPageRoute(
+                                                  builder: (context) =>
+                                                      ConfirmOrderScreen(
+                                                        addressID: profileProvider
+                                                                        .userAddresses[
+                                                                    item][
+                                                                "address_id"] ??
+                                                            "",
+                                                      )))
+                                          : () {};
                                     },
                                     child: Row(
                                       crossAxisAlignment:
@@ -176,24 +177,6 @@ showAddressesBottomSheet(
                                               return index == 0
                                                   ? Row(
                                                       children: [
-                                                        Checkbox(
-                                                            value: profileProvider
-                                                                    .checkAdd[
-                                                                item]["value"],
-                                                            onChanged:
-                                                                (bool? value) {
-                                                              log(index
-                                                                  .toString());
-                                                              profileProvider
-                                                                  .checkBoxUpdate(
-                                                                      value!,
-                                                                      item,
-                                                                      context);
-
-                                                              log(profileProvider
-                                                                  .checkAdd
-                                                                  .toString());
-                                                            }),
                                                         Padding(
                                                           padding:
                                                               const EdgeInsets
@@ -214,14 +197,15 @@ showAddressesBottomSheet(
                                             itemCount: 5,
                                           ),
                                         ),
-                                        // Padding(
-                                        //   padding: const EdgeInsets.symmetric(
-                                        //       vertical: 12),
-                                        //   child: IconButton(
-                                        //     onPressed: () {},
-                                        //     icon: const Icon(Icons.edit_rounded),
-                                        //   ),
-                                        // ),
+                                        Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              vertical: 12),
+                                          child: IconButton(
+                                            onPressed: () {},
+                                            icon:
+                                                const Icon(Icons.edit_rounded),
+                                          ),
+                                        ),
                                         Padding(
                                           padding: const EdgeInsets.symmetric(
                                               vertical: 12),
@@ -321,49 +305,19 @@ showAddressesBottomSheet(
                                   );
                                 },
                               ),
-                              Center(
-                                child: TextWidget(
-                                  '-------------- or --------------',
-                                  color: Colors.grey,
-                                  flow: TextOverflow.visible,
-                                  align: TextAlign.center,
-                                  size:
-                                      themeData.textTheme.bodyMedium?.fontSize,
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 12.0),
+                                child: Center(
+                                  child: TextWidget(
+                                    '-------------- or --------------',
+                                    color: Colors.grey,
+                                    flow: TextOverflow.visible,
+                                    align: TextAlign.center,
+                                    size: themeData
+                                        .textTheme.bodyMedium?.fontSize,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(
-                                height: 12,
-                              ),
-                              isOrderWorkflow
-                                  ? ElevatedButtonWidget(
-                                      bgColor:
-                                          Theme.of(context).colorScheme.primary,
-                                      trailingIcon: Icons.add_rounded,
-                                      buttonName: 'Continue'.toUpperCase(),
-                                      textColor: Theme.of(context)
-                                          .colorScheme
-                                          .background,
-                                      textStyle: FontWeight.w800,
-                                      borderRadius: 8,
-                                      onClick: () {
-                                        isOrderWorkflow
-                                            ? Navigator.of(context).push(
-                                                MaterialPageRoute(
-                                                    builder: (context) =>
-                                                        ConfirmOrderScreen(
-                                                          addressID: profileProvider
-                                                                      .userAddresses[
-                                                                  profileProvider
-                                                                          .checkBox[
-                                                                      "index"]]["address_id"] ??
-                                                              "",
-                                                        )))
-                                            : () {};
-                                      },
-                                    )
-                                  : const SizedBox(),
-                              const SizedBox(
-                                height: 10,
                               ),
                               ElevatedButtonWidget(
                                 bgColor: Theme.of(context)

@@ -45,21 +45,28 @@ class _NandikrushiNavHostState extends State<NandikrushiNavHost> {
         LoginProvider loginProvider =
             Provider.of<LoginProvider>(context, listen: false);
         profileProvider.showLoader();
-        profileProvider
-            .getProfile(
-                loginProvider: loginProvider,
-                userID: widget.userId,
-                showMessage: (_) {
-                  snackbar(context, _);
-                },
-                navigator: Navigator.of(context))
-            .then((value) {
-          productProvider.getData(
-              profileProvider: profileProvider,
-              showMessage: (_) {
-                snackbar(context, _);
+        profileProvider.getVideos(
+            context: context,
+            onSuccessful: () {
+              profileProvider
+                  .getProfile(
+                      loginProvider: loginProvider,
+                      userID: widget.userId,
+                      showMessage: (_) {
+                        snackbar(context, _);
+                      },
+                      navigator: Navigator.of(context))
+                  .then((value) {
+                productProvider.getData(
+                    profileProvider: profileProvider,
+                    showMessage: (_) {
+                      snackbar(context, _);
+                    });
               });
-        });
+            },
+            showMessage: (_) {
+              snackbar(context, _);
+            });
       }
     });
   }

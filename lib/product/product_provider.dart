@@ -448,6 +448,8 @@ class ProductProvider extends ChangeNotifier {
     notifyListeners();
     profileProvider.showLoader();
     var url =
+        // profileProvider.customerGroupId == "3"
+        // ? "https://nkweb.sweken.com/index.php?route=extension/account/purpletree_multivendor/api/getallapprovedfarmerproducts":
         "https://nkweb.sweken.com/index.php?route=extension/account/purpletree_multivendor/api/getallproducts";
     var response = await Server().getMethodParams(url);
     if (response == null) {
@@ -462,7 +464,19 @@ class ProductProvider extends ChangeNotifier {
     }
     if (response.statusCode == 200) {
       try {
-        List<dynamic> decodedResponse = jsonDecode(response.body)["Products"];
+        List<dynamic> decodedResponse =
+            (jsonDecode(response.body)["Products"] as List<dynamic>)
+                .where(
+                  (element) =>
+                      element["Products"][0]["verify_seller"] == "1" &&
+                      (profileProvider.customerGroupId == "3"
+                          ? element["vendor_details"][0]["type"] == "2"
+                          : profileProvider.customerGroupId == "4"
+                              ? (element["vendor_details"][0]["type"] == "2" ||
+                                  element["vendor_details"][0]["type"] == "3")
+                              : true),
+                )
+                .toList();
         products = [];
 
         for (var e in decodedResponse) {
@@ -472,12 +486,9 @@ class ProductProvider extends ChangeNotifier {
                   int.tryParse(e["category"][0]["category_id"] ?? "-1"))
               .isNotEmpty) {
             var product = ProductModel.fromJson(e, allCategories).toEntity();
-                
-              // 'customer_ratings': jsonEncode(e["Products"][0]["rating"]),
-            //TODO Replace sellerID with actual data and certificate and add reviews
 
-            
-            
+            // 'customer_ratings': jsonEncode(e["Products"][0]["rating"]),
+            //TODO Replace sellerID with actual data and certificate and add reviews
 
             log("12Prod->$product ,; $e");
             products.add(product);
@@ -564,14 +575,13 @@ class ProductProvider extends ChangeNotifier {
                 "product_name": productOrderDetails["product_name"],
                 "description": products
                         .where((e) =>
-                            e.productId ==
-                            productOrderDetails["product_id"])
+                            e.productId == productOrderDetails["product_id"])
                         .isNotEmpty
                     ? products
                         .where((e) =>
-                            e.productId ==
-                            productOrderDetails["product_id"])
-                        .first.description
+                            e.productId == productOrderDetails["product_id"])
+                        .first
+                        .description
                     : (productOrderDetails["description"] ??
                         "Nandikrushi products are organic and fresh"),
                 "url": products
@@ -583,29 +593,29 @@ class ProductProvider extends ChangeNotifier {
                                     .where((e) =>
                                         e.productId ==
                                         productOrderDetails["product_id"])
-                                    .first.image)
+                                    .first
+                                    .image)
                                 ?.host
                                 .isNotEmpty ??
                             false)
                     ? products
                         .where((e) =>
-                            e.productId ==
-                            productOrderDetails["product_id"])
-                        .first.image
+                            e.productId == productOrderDetails["product_id"])
+                        .first
+                        .image
                     : "http://images.jdmagicbox.com/comp/visakhapatnam/q2/0891px891.x891.180329082226.k1q2/catalogue/nandi-krushi-visakhapatnam-e-commerce-service-providers-aomg9cai5i-250.jpg",
                 "price": productOrderDetails["price"],
                 "product_id": productOrderDetails["product_id"],
                 "quantity": productOrderDetails["quantity"],
                 "units": products
                         .where((e) =>
-                            e.productId ==
-                            productOrderDetails["product_id"])
+                            e.productId == productOrderDetails["product_id"])
                         .isNotEmpty
                     ? products
                         .where((e) =>
-                            e.productId ==
-                            productOrderDetails["product_id"])
-                        .first.units
+                            e.productId == productOrderDetails["product_id"])
+                        .first
+                        .units
                     : "units",
                 "place": element["shipping_details"][0]["shipping_city"],
               });
@@ -716,48 +726,48 @@ class ProductProvider extends ChangeNotifier {
                     ["delivery_time"],
                 "description": products
                         .where((e) =>
-                            e.productId ==
-                            productOrderDetails["product_id"])
+                            e.productId == productOrderDetails["product_id"])
                         .isNotEmpty
                     ? products
                         .where((e) =>
-                            e.productId ==
-                            productOrderDetails["product_id"])
-                        .first.description
+                            e.productId == productOrderDetails["product_id"])
+                        .first
+                        .description
                     : (productOrderDetails["description"] ??
                         "Nandikrushi products are organic and fresh"),
                 "url": products
                             .where((e) =>
-                                e.productId ==
+                                e.productId.toString() ==
                                 productOrderDetails["product_id"])
                             .isNotEmpty &&
                         (Uri.tryParse(products
                                     .where((e) =>
-                                        e.productId ==
+                                        e.productId.toString() ==
                                         productOrderDetails["product_id"])
-                                    .first.image)
+                                    .first
+                                    .image)
                                 ?.host
                                 .isNotEmpty ??
                             false)
                     ? products
                         .where((e) =>
-                            e.productId ==
+                            e.productId.toString() ==
                             productOrderDetails["product_id"])
-                        .first.image
+                        .first
+                        .image
                     : "http://images.jdmagicbox.com/comp/visakhapatnam/q2/0891px891.x891.180329082226.k1q2/catalogue/nandi-krushi-visakhapatnam-e-commerce-service-providers-aomg9cai5i-250.jpg",
                 "price": productOrderDetails["price"],
                 "product_id": productOrderDetails["product_id"],
                 "quantity": productOrderDetails["quantity"],
                 "units": products
                         .where((e) =>
-                            e.productId ==
-                            productOrderDetails["product_id"])
+                            e.productId == productOrderDetails["product_id"])
                         .isNotEmpty
                     ? products
                         .where((e) =>
-                            e.productId ==
-                            productOrderDetails["product_id"])
-                        .first.units
+                            e.productId == productOrderDetails["product_id"])
+                        .first
+                        .units
                     : "units",
                 "payment_method": element["payment_details"][0]
                     ["payment_method"],
@@ -783,14 +793,13 @@ class ProductProvider extends ChangeNotifier {
                 "telephone": element["customer_details"][0]["telephone"],
                 "rating": products
                         .where((e) =>
-                            e.productId ==
-                            productOrderDetails["product_id"])
+                            e.productId == productOrderDetails["product_id"])
                         .isNotEmpty
                     ? products
                         .where((e) =>
-                            e.productId ==
-                            productOrderDetails["product_id"])
-                        .first.aggregateRating
+                            e.productId == productOrderDetails["product_id"])
+                        .first
+                        .aggregateRating
                     : "3.5"
               });
               // }
@@ -1170,7 +1179,8 @@ class ProductProvider extends ChangeNotifier {
     var productDetails =
         products.where((e) => e.productId.toString() == productID).first;
     var initialCartIems = int.tryParse(cart
-                .where((e) => e["product_id"] == productDetails.productId.toString())
+                .where((e) =>
+                    e["product_id"] == productDetails.productId.toString())
                 .first["quantity"] ??
             "0") ??
         0;
@@ -1182,8 +1192,10 @@ class ProductProvider extends ChangeNotifier {
             return Container(
               height: 300,
               padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                  color: Colors.white, borderRadius: BorderRadius.circular(16)),
+              decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius:
+                      BorderRadius.vertical(top: Radius.circular(16))),
               child: Row(
                 children: [
                   Expanded(
@@ -1216,7 +1228,8 @@ class ProductProvider extends ChangeNotifier {
                             const Icon(Icons.location_on_rounded),
                             Expanded(
                               child: TextWidget(
-                                productDetails.produceLocation ?? "Visakhapatnam",
+                                productDetails.produceLocation ??
+                                    "Visakhapatnam",
                                 size: 12,
                               ),
                             ),

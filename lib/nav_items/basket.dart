@@ -70,7 +70,12 @@ class _BasketScreenState extends State<BasketScreen> {
                           /// The seperator builder that draws each card in the basket
                           ListView.separated(
                             separatorBuilder: ((context, index) {
-                              return const Divider();
+                              return Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16.0, vertical: 12),
+                                child: Opacity(
+                                    opacity: 0.2, child: const Divider()),
+                              );
                             }),
                             primary: false,
                             shrinkWrap: true,
@@ -102,7 +107,12 @@ class _BasketScreenState extends State<BasketScreen> {
                                       "");
                             }),
                           ),
-                          const Divider(),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 8),
+                            child:
+                                Opacity(opacity: 0.2, child: const Divider()),
+                          ),
                           Padding(
                             padding: const EdgeInsets.only(
                                 bottom: 16, left: 24, right: 24),
@@ -178,7 +188,12 @@ class _BasketScreenState extends State<BasketScreen> {
                                     ),
                                   ),
                                 ),
-                          const Divider(),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 8),
+                            child:
+                                Opacity(opacity: 0.2, child: const Divider()),
+                          ),
                           const SizedBox(
                             height: 12,
                           ),

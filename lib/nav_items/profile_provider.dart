@@ -12,9 +12,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart';
+import 'package:nandikrushi_farmer/data/models/video_model.dart';
 import 'package:nandikrushi_farmer/reusable_widgets/snackbar.dart';
 import 'package:nandikrushi_farmer/utils/server.dart';
 
+import '../domain/entity/video.dart';
 import '../onboarding/login/login_provider.dart';
 import '../reusable_widgets/application_pending.dart';
 
@@ -48,6 +50,9 @@ class ProfileProvider extends ChangeNotifier {
   List<Map<String, String>> notifications = [];
   bool isDataFetched = false;
   dynamic ordKey;
+
+  List<Video> videos = [];
+
   showLoader() {
     shouldShowLoader = true;
     notifyListeners();
@@ -94,6 +99,71 @@ class ProfileProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> getVideos(
+      {required BuildContext context,
+      required Function() onSuccessful,
+      required Function(String) showMessage}) async {
+    fetchingDataType = "fetch the videos";
+    notifyListeners();
+    showLoader();
+    var url =
+        "https://nkweb.sweken.com/index.php?route=extension/account/purpletree_multivendor/api/videos/getvideos";
+    var response =
+        await Server().postFormData(body: {"user_type": "3"}, url: url);
+    if (response == null) {
+      showMessage("Failed to get a response from the server!");
+      //hideLoader();
+      if (Platform.isAndroid) {
+        SystemNavigator.pop();
+      } else if (Platform.isIOS) {
+        exit(0);
+      }
+      return;
+    }
+    if (response.statusCode == 200) {
+      try {
+        if (jsonDecode(response.body)["status"]) {
+          List<dynamic> jsonData = json.decode(response.body)["message"];
+          videos =
+              jsonData.map((e) => VideoModel.fromJson(e).toEntity()).toList();
+        } else {
+          showMessage("Error fetching categories 1!");
+          hideLoader();
+          notifyListeners();
+        }
+
+        notifyListeners();
+      } on Exception catch (e) {
+        showMessage("Error fetching categories - 2: $e");
+        hideLoader();
+        notifyListeners();
+      }
+    } else if (response.statusCode == 400) {
+      showMessage("Undefined parameter when calling API");
+      if (Platform.isAndroid) {
+        SystemNavigator.pop();
+      } else if (Platform.isIOS) {
+        exit(0);
+      }
+    } else if (response.statusCode == 404) {
+      showMessage("API not found");
+      if (Platform.isAndroid) {
+        SystemNavigator.pop();
+      } else if (Platform.isIOS) {
+        exit(0);
+      }
+    } else {
+      showMessage("Failed to get data!");
+      if (Platform.isAndroid) {
+        SystemNavigator.pop();
+      } else if (Platform.isIOS) {
+        exit(0);
+      }
+    }
+
+    onSuccessful();
+  }
+
   Future<void> getProfile(
       {required LoginProvider loginProvider,
       required String userID,
@@ -109,7 +179,6 @@ class ProfileProvider extends ChangeNotifier {
             : "https://nkweb.sweken.com/index.php?route=extension/account/purpletree_multivendor/api/restaurantregistration/getparticularorganicrestaurant";
     var response =
         await Server().postFormData(body: {"user_id": userID}, url: url);
-    //TODO: Videos API needs to be integrated
 
     if (response == null) {
       showMessage("Failed to get a response from the server!");

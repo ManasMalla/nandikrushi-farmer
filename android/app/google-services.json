@@ -38,6 +38,14 @@
           }
         },
         {
+          "client_id": "250225425929-ntiv77cppjc29clndaidkli9csdd0kot.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.nandikrushi",
+            "certificate_hash": "3515385be8b0ca1c7ac685731550daa8140b282a"
+          }
+        },
+        {
           "client_id": "250225425929-okf70cbebno6h027tfim0ehpprvi3h2p.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -98,6 +106,14 @@
           }
         },
         {
+          "client_id": "250225425929-d6kbdv4qfjf29cbmlent3d037pvf6dkp.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "farm.nandikrushi",
+            "certificate_hash": "9b43d04460055e0c353af6e108dbaa3e8a7d600e"
+          }
+        },
+        {
           "client_id": "250225425929-doahjdlnc7klejplohugliaijfanmhko.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
@@ -119,6 +135,14 @@
           "android_info": {
             "package_name": "farm.nandikrushi",
             "certificate_hash": "e0928a27a5e839c0d5bef33cfdaafd3d944c9705"
+          }
+        },
+        {
+          "client_id": "250225425929-kcis3isgsag313k1nng55v1f9jc5rno2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "farm.nandikrushi",
+            "certificate_hash": "8673fafc69ae246a849e610349c34fc4bb0a6c0c"
           }
         },
         {

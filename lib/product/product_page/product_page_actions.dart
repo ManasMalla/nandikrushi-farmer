@@ -1,18 +1,21 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
+import 'package:nandikrushi_farmer/domain/entity/product.dart';
 
 import '../../nav_items/my_account.dart';
 import '../../reusable_widgets/snackbar.dart';
 import '../../reusable_widgets/text_widget.dart';
+import '../product_provider.dart';
 
-productPageActions(context, productProvider, productDetails, profileProvider) {
-  log(productDetails["verify_seller"].toString());
+productPageActions(context, ProductProvider productProvider,
+    Product productDetails, profileProvider) {
   return Row(
     children: [
-      productDetails["verify_seller"] == "1"
+      productDetails.canBeSold
           ? productProvider.cart
-                  .where((e) => e["product_id"] == productDetails["product_id"])
+                  .where((e) =>
+                      e["product_id"] == productDetails.productId.toString())
                   .isNotEmpty
               ? OutlinedButton(
                   style: OutlinedButton.styleFrom(
@@ -29,7 +32,7 @@ productPageActions(context, productProvider, productDetails, profileProvider) {
                   onPressed: () {
                     productProvider.modifyProductToCart(
                         context: context,
-                        productID: productDetails["product_id"] ?? "",
+                        productID: productDetails.productId.toString(),
                         onSuccessful: () => null,
                         showMessage: (_) {
                           snackbar(context, _);
@@ -69,7 +72,7 @@ productPageActions(context, productProvider, productDetails, profileProvider) {
                   onPressed: () {
                     productProvider.addProductToCart(
                         context: context,
-                        productID: productDetails["product_id"] ?? "",
+                        productID: productDetails.productId.toString(),
                         onSuccessful: () => null,
                         showMessage: (_) {
                           snackbar(context, _);
@@ -190,7 +193,8 @@ productPageActions(context, productProvider, productDetails, profileProvider) {
                               onPressed: () async {
                                 dialCall(
                                     mobileNumber:
-                                        productDetails["seller_mobile"] ?? "");
+                                        productDetails.seller.phoneNumber ??
+                                            "");
                               },
                               child: const Text("Phone"),
                             ),

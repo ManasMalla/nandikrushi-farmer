@@ -48,7 +48,7 @@ class ElevatedButtonWidget extends StatelessWidget {
         borderRadius: BorderRadius.circular(borderRadius ?? 0),
         child: SizedBox(
           width: minWidth ?? double.infinity,
-          height: height ?? 50.0,
+          height: height ?? 54.0,
           child: ElevatedButton(
               onPressed: () {
                 return onClick!();

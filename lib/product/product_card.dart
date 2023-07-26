@@ -80,7 +80,8 @@ class _ProductCardState extends State<ProductCard> {
               Navigator.of(context).push(MaterialPageRoute(
                   builder: (context) => ProductPage(
                         product: productProvider.products
-                            .where((e) => e.productId.toString() == widget.productId)
+                            .where((e) =>
+                                e.productId.toString() == widget.productId)
                             .first,
                       )));
             }
@@ -96,7 +97,7 @@ class _ProductCardState extends State<ProductCard> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    widget.productName,
+                    capitalize(widget.productName),
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   widget.productDescription != null
@@ -311,7 +312,9 @@ class _ProductCardState extends State<ProductCard> {
                                           context: context,
                                           shape: RoundedRectangleBorder(
                                               borderRadius:
-                                                  BorderRadius.circular(12)),
+                                                  BorderRadius.vertical(
+                                                      top:
+                                                          Radius.circular(12))),
                                           builder: (context) {
                                             return Container(
                                               height: 250,

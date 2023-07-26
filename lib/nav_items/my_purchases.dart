@@ -185,7 +185,12 @@ class _MyPurchasesScreenState extends State<MyPurchasesScreen> {
                           primary: false,
                           shrinkWrap: true,
                           separatorBuilder: (_, __) {
-                            return const Divider();
+                            return Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 12.0),
+                              child:
+                                  Opacity(opacity: 0.2, child: const Divider()),
+                            );
                           },
                           itemCount: productProvider
                               .myPurchases[itemIndex]["products"].length,
@@ -229,7 +234,10 @@ class _MyPurchasesScreenState extends State<MyPurchasesScreen> {
                   );
                 },
                 separatorBuilder: (context, _) {
-                  return const Divider();
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                    child: Opacity(opacity: 0.2, child: const Divider()),
+                  );
                 },
                 itemCount: productProvider.myPurchases.length);
       }),

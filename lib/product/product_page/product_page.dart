@@ -43,8 +43,7 @@ class _ProductPageState extends State<ProductPage> {
       child: Consumer<ProductProvider>(builder: (context, productProvider, _) {
         return Consumer<ProfileProvider>(
             builder: (context, profileProvider, _) {
-          double rating =
-              (widget.product.aggregateRating);
+          double rating = (widget.product.aggregateRating);
 
           return Scaffold(
             backgroundColor: Theme.of(context).colorScheme.background,
@@ -108,8 +107,7 @@ class _ProductPageState extends State<ProductPage> {
                                 color: Theme.of(context).colorScheme.primary,
                               ),
                               TextWidget(
-                                widget.product.price.toStringAsFixed(2) ??
-                                    "",
+                                widget.product.price.toStringAsFixed(2) ?? "",
                                 size: Theme.of(context)
                                     .textTheme
                                     .headlineLarge
@@ -211,7 +209,7 @@ class _ProductPageState extends State<ProductPage> {
                                 weight: FontWeight.w500,
                               ),
                               TextWidget(
-                                widget.product.seller.certificate.name,
+                                widget.product.seller.certificate.toString(),
                                 weight: FontWeight.w500,
                                 color: Theme.of(context).colorScheme.primary,
                               ),
@@ -220,8 +218,8 @@ class _ProductPageState extends State<ProductPage> {
                           const SizedBox(
                             height: 12,
                           ),
-                          moreFarmerProducts(
-                              productProvider, widget.product),
+                          // moreFarmerProducts(
+                          //     productProvider, widget.product),
                         ],
                       ),
                     ),

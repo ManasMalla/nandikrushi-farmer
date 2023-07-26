@@ -48,217 +48,191 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: scaffoldKey,
-      body: Consumer<LoginProvider>(builder: (context, loginProvider, __) {
+      body: Consumer<LoginProvider>(builder: (_, loginProvider, __) {
         return LayoutBuilder(builder: (context, constraints) {
           return constraints.maxWidth < 500
               ? Stack(
-            children: [
-              PageView.builder(
-                controller: loginPageController.pageController,
-                itemCount: 2,
-                itemBuilder: (context, pageIndex) {
-                  return SingleChildScrollView(
-                    child: Stack(
-                      children: [
-                        Positioned(
-                          top: -(getProportionateHeight(28, constraints)),
-                          left: getProportionateWidth(210, constraints),
-                          child: Image(
-                            image: AssetImage(
-                                "assets/images/${loginProvider.isFarmer
-                                    ? "ic_farmer"
-                                    : loginProvider.userAppTheme.key.contains(
-                                    "Store")
-                                    ? "ic_store"
-                                    : "ic_restaurant"}.png"),
-                          ),
-                        ),
-                        Container(
-                          margin: EdgeInsets.only(
-                              top: getProportionateHeight(
-                                  75, constraints)),
-                          padding:
-                          const EdgeInsets.symmetric(horizontal: 36),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    PageView.builder(
+                      controller: loginPageController.pageController,
+                      itemCount: 2,
+                      itemBuilder: (context, pageIndex) {
+                        return SingleChildScrollView(
+                          child: Stack(
                             children: [
-                              Text(
-                                "Nandikrushi",
-                                style: TextStyle(
-                                    color: calculateContrast(
-                                        const Color(0xFF769F77),
-                                        createMaterialColor(
-                                            Theme
-                                                .of(context)
-                                                .colorScheme
-                                                .primary)
-                                            .shade700) >
-                                        3
-                                        ? createMaterialColor(
-                                        Theme
-                                            .of(context)
-                                            .colorScheme
-                                            .primary)
-                                        .shade700
-                                        : createMaterialColor(
-                                        Theme
-                                            .of(context)
-                                            .colorScheme
-                                            .primary)
-                                        .shade100,
-                                    fontFamily: 'Samarkan',
-                                    fontSize: getProportionateHeight(
-                                        32, constraints)),
+                              Positioned(
+                                top: -(getProportionateHeight(28, constraints)),
+                                left: getProportionateWidth(210, constraints),
+                                child: Image(
+                                  image: AssetImage(
+                                      "assets/images/${loginProvider.isFarmer ? "ic_farmer" : loginProvider.userAppTheme.key.contains("Store") ? "ic_store" : "ic_restaurant"}.png"),
+                                ),
                               ),
-                              TextWidget(
-                                "Create Account".toUpperCase(),
-                                color:
-                                Theme
-                                    .of(context)
-                                    .colorScheme
-                                    .primary,
-                                weight: FontWeight.bold,
-                                size: Theme
-                                    .of(context)
-                                    .textTheme
-                                    .titleSmall
-                                    ?.fontSize,
+                              Container(
+                                margin: EdgeInsets.only(
+                                    top: getProportionateHeight(
+                                        75, constraints)),
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 36),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      "Nandikrushi",
+                                      style: TextStyle(
+                                          color: calculateContrast(
+                                                      const Color(0xFF769F77),
+                                                      createMaterialColor(
+                                                              Theme.of(context)
+                                                                  .colorScheme
+                                                                  .primary)
+                                                          .shade700) >
+                                                  3
+                                              ? createMaterialColor(
+                                                      Theme.of(context)
+                                                          .colorScheme
+                                                          .primary)
+                                                  .shade700
+                                              : createMaterialColor(
+                                                      Theme.of(context)
+                                                          .colorScheme
+                                                          .primary)
+                                                  .shade100,
+                                          fontFamily: 'Samarkan',
+                                          fontSize: getProportionateHeight(
+                                              32, constraints)),
+                                    ),
+                                    TextWidget(
+                                      "Create Account".toUpperCase(),
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
+                                      weight: FontWeight.bold,
+                                      size: Theme.of(context)
+                                          .textTheme
+                                          .titleSmall
+                                          ?.fontSize,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Padding(
+                                padding: EdgeInsets.only(
+                                    top: getProportionateHeight(
+                                        150, constraints)),
+                                child: pageIndex == 0
+                                    ? RegistrationDetailsFirstPage(
+                                        loginPageController,
+                                        setState,
+                                        loginProvider,
+                                        constraints,
+                                        showImagePickerSheet)
+                                    : Column(
+                                        children: registrationDetailsSecondPage(
+                                            context,
+                                            loginPageController,
+                                            setState,
+                                            loginProvider,
+                                            constraints,
+                                            showImagePickerSheet),
+                                      ),
                               ),
                             ],
                           ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(
-                              top: getProportionateHeight(
-                                  150, constraints)),
-                          child: Column(
-                            children: pageIndex == 0
-                                ? registrationDetailsFirstPage(
-                                context,
-                                loginPageController,
-                                setState,
-                                loginProvider,
-                                constraints,
-                                showImagePickerSheet)
-                                : registrationDetailsSecondPage(
-                                context,
-                                loginPageController,
-                                setState,
-                                loginProvider,
-                                constraints,
-                                showImagePickerSheet),
-                          ),
-                        ),
-                      ],
+                        );
+                      },
                     ),
-                  );
-                },
-              ),
-              Consumer<LoginProvider>(
-                  builder: (context, loginProvider, _) {
-                    return loginProvider.shouldShowLoader
-                        ? LoaderScreen(loginProvider)
-                        : const SizedBox();
-                  }),
-            ],
-          )
+                    Consumer<LoginProvider>(
+                        builder: (context, loginProvider, _) {
+                      return loginProvider.shouldShowLoader
+                          ? LoaderScreen(loginProvider)
+                          : const SizedBox();
+                    }),
+                  ],
+                )
               : Stack(
-            children: [
-              Positioned(
-                top: -(getProportionateHeight(28, constraints)),
-                left: getProportionateWidth(210, constraints),
-                child: Image(
-                  image: AssetImage(
-                      "assets/images/${loginProvider.isFarmer
-                          ? "ic_farmer"
-                          : loginProvider.userAppTheme.key.contains("Store")
-                          ? "ic_store"
-                          : "ic_restaurant"}.png"),
-                ),
-              ),
-              Container(
-                margin: EdgeInsets.only(
-                    top: getProportionateHeight(75, constraints)),
-                padding: const EdgeInsets.symmetric(horizontal: 36),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      "Nandikrushi",
-                      style: TextStyle(
-                          color: calculateContrast(
-                              const Color(0xFF769F77),
-                              createMaterialColor(
-                                  Theme
-                                      .of(context)
-                                      .colorScheme
-                                      .primary)
-                                  .shade700) >
-                              3
-                              ? createMaterialColor(Theme
-                              .of(context)
-                              .colorScheme
-                              .primary)
-                              .shade700
-                              : createMaterialColor(Theme
-                              .of(context)
-                              .colorScheme
-                              .primary)
-                              .shade100,
-                          fontFamily: 'Samarkan',
-                          fontSize:
-                          getProportionateHeight(32, constraints)),
+                    Positioned(
+                      top: -(getProportionateHeight(28, constraints)),
+                      left: getProportionateWidth(210, constraints),
+                      child: Image(
+                        image: AssetImage(
+                            "assets/images/${loginProvider.isFarmer ? "ic_farmer" : loginProvider.userAppTheme.key.contains("Store") ? "ic_store" : "ic_restaurant"}.png"),
+                      ),
                     ),
-                    TextWidget(
-                      "Create Account".toUpperCase(),
-                      color: Theme
-                          .of(context)
-                          .colorScheme
-                          .primary,
-                      weight: FontWeight.bold,
-                      size: Theme
-                          .of(context)
-                          .textTheme
-                          .titleSmall
-                          ?.fontSize,
+                    Container(
+                      margin: EdgeInsets.only(
+                          top: getProportionateHeight(75, constraints)),
+                      padding: const EdgeInsets.symmetric(horizontal: 36),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Nandikrushi",
+                            style: TextStyle(
+                                color: calculateContrast(
+                                            const Color(0xFF769F77),
+                                            createMaterialColor(
+                                                    Theme.of(context)
+                                                        .colorScheme
+                                                        .primary)
+                                                .shade700) >
+                                        3
+                                    ? createMaterialColor(Theme.of(context)
+                                            .colorScheme
+                                            .primary)
+                                        .shade700
+                                    : createMaterialColor(Theme.of(context)
+                                            .colorScheme
+                                            .primary)
+                                        .shade100,
+                                fontFamily: 'Samarkan',
+                                fontSize:
+                                    getProportionateHeight(32, constraints)),
+                          ),
+                          TextWidget(
+                            "Create Account".toUpperCase(),
+                            color: Theme.of(context).colorScheme.primary,
+                            weight: FontWeight.bold,
+                            size: Theme.of(context)
+                                .textTheme
+                                .titleSmall
+                                ?.fontSize,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.only(
+                          top: getProportionateHeight(150, constraints)),
+                      child: SingleChildScrollView(
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: RegistrationDetailsFirstPage(
+                                  loginPageController,
+                                  setState,
+                                  loginProvider,
+                                  constraints,
+                                  showImagePickerSheet),
+                            ),
+                            Expanded(
+                                child: Column(
+                              children: registrationDetailsSecondPage(
+                                  context,
+                                  loginPageController,
+                                  setState,
+                                  loginProvider,
+                                  constraints,
+                                  showImagePickerSheet),
+                            )),
+                          ],
+                        ),
+                      ),
                     ),
                   ],
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.only(
-                    top: getProportionateHeight(150, constraints)),
-                child: SingleChildScrollView(
-                  child: Row(
-                    children: [
-                      Expanded(
-                          child: Column(
-                            children: registrationDetailsFirstPage(
-                                context,
-                                loginPageController,
-                                setState,
-                                loginProvider,
-                                constraints,
-                                showImagePickerSheet),
-                          )),
-                      Expanded(
-                          child: Column(
-                            children: registrationDetailsSecondPage(
-                                context,
-                                loginPageController,
-                                setState,
-                                loginProvider,
-                                constraints,
-                                showImagePickerSheet),
-                          )),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          );
+                );
         });
       }),
     );

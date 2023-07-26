@@ -129,7 +129,7 @@ class _VideosScreenState extends State<VideosScreen>
                     ),
                   );
                 },
-                itemCount: videoID.length,
+                itemCount: productProvider.videos.length,
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     childAspectRatio: 1.8,

@@ -36,6 +36,7 @@ class ProductController extends ControllerMVC {
       BuildContext context,
       List<String> image,
       List<String> unitsList,
+      Map<dynamic, bool> ingredients,
       Function(String) showMessage,
       ProductProvider productProvider,
       ProfileProvider profileProvider) async {
@@ -104,7 +105,12 @@ class ProductController extends ControllerMVC {
       "seller_id": profileProvider.sellerID,
     };
     if (!loginProvider.isFarmer) {
-      body.addAll({"ingredients[]": "ingredient"});
+      // ingredients.forEach((key, value) {
+      body.addAll({
+        "ingredients[0]":
+            {"product_id": 329, quantity: 1}.toString()
+        // });
+      });
     }
     image.asMap().entries.forEach((_) {
       body.addAll({"product_image[${_.key}]": _.value});

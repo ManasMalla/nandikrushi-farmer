@@ -25,6 +25,7 @@ import 'package:provider/provider.dart';
 
 import '../reusable_widgets/loader_screen.dart';
 import '../utils/login_utils.dart';
+import 'no_ingredients_dialog.dart';
 
 class AddProductScreen extends StatefulWidget {
   const AddProductScreen({Key? key}) : super(key: key);
@@ -35,7 +36,7 @@ class AddProductScreen extends StatefulWidget {
 
 class _AddProductScreenState extends State<AddProductScreen> {
   ProductController addProductController = ProductController();
-  Map<dynamic, bool> selectedIngredients = {};
+  Map<String, bool> selectedIngredients = {};
   @override
   Widget build(BuildContext context) {
     return Consumer<LoginProvider>(builder: (context, loginProvider, __) {
@@ -673,21 +674,22 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                                                 .textTheme
                                                                 .bodyMedium,
                                                           ),
-                                                          dropdownColor: ElevationOverlay
-                                                              .colorWithOverlay(
-                                                                  Theme.of(context)
-                                                                      .colorScheme
-                                                                      .surface,
-                                                                  Theme.of(context)
-                                                                      .colorScheme
-                                                                      .primary,
-                                                                  2.0),
+                                                          dropdownColor: ElevationOverlay.colorWithOverlay(
+                                                              Theme.of(context)
+                                                                  .colorScheme
+                                                                  .surface,
+                                                              Theme.of(context)
+                                                                  .colorScheme
+                                                                  .primary,
+                                                              2.0),
                                                           value: addProductController
                                                               .selectedSubCategory,
                                                           items: (productProvider
-                                                                      .subcategories[
-                                                                          productProvider
-                                                                              .categories[addProductController.selectedCategory]]
+                                                                      .subcategories[productProvider
+                                                                          .categories[loginProvider.isFarmer ||
+                                                                              selectedIngredients.isEmpty
+                                                                          ? addProductController.selectedCategory
+                                                                          : (selectedIngredients.length > 1 ? "Weekly Basket" : productProvider.products.where((element) => element.productId.toString() == selectedIngredients.keys.first).first.category)]]
                                                                       ?.map((e) => e.keys.first) ??
                                                                   [])
                                                               .map((e) => DropdownMenuItem(
@@ -715,49 +717,49 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                                 ),
                                                 loginProvider.isRestaurant ||
                                                         loginProvider.isStore
-                                                    ? SingleChildScrollView(
-                                                        scrollDirection:
-                                                            Axis.horizontal,
-                                                        child: DataTable(
-                                                            border:
-                                                                TableBorder.all(
-                                                              width: 2.0,
-                                                              color: Theme.of(
-                                                                      context)
-                                                                  .colorScheme
-                                                                  .background,
-                                                            ),
-                                                            headingRowColor: MaterialStateColor.resolveWith((states) => Theme.of(context)
-                                                                .colorScheme
-                                                                .primary),
-                                                            headingTextStyle: MaterialStateTextStyle.resolveWith((states) =>
-                                                                Theme.of(context).textTheme.titleMedium ??
-                                                                TextStyle()),
-                                                            columns: const [
-                                                              DataColumn(
-                                                                  label: Text(
-                                                                      "Select")),
-                                                              DataColumn(
-                                                                  label: Text(
-                                                                      "Ingredient")),
-                                                              DataColumn(
-                                                                  label: Text(
-                                                                      "Farmer")),
-                                                              DataColumn(
-                                                                  label: Text(
-                                                                      "Date of Purchase")),
-                                                              DataColumn(
-                                                                  label: Text(
-                                                                      "Qty")),
-                                                            ],
-                                                            rows:
-                                                                productProvider
-                                                                    .myPurchases
-                                                                    .where((element) =>
-                                                                        (int.tryParse(element["products"][0]["order_status_id"]) ?? 0) >=
-                                                                        4)
-                                                                    .fold<List<dynamic>>([], (previousValue,
-                                                                        element) {
+                                                    ? productProvider
+                                                            .myPurchases.isEmpty
+                                                        ? NoIngredientsDialog()
+                                                        : SingleChildScrollView(
+                                                            scrollDirection:
+                                                                Axis.horizontal,
+                                                            child: DataTable(
+                                                                border: TableBorder
+                                                                    .all(
+                                                                  width: 2.0,
+                                                                  color: Theme.of(
+                                                                          context)
+                                                                      .colorScheme
+                                                                      .background,
+                                                                ),
+                                                                headingRowColor: MaterialStateColor.resolveWith((states) =>
+                                                                    Theme.of(context)
+                                                                        .colorScheme
+                                                                        .primary),
+                                                                headingTextStyle:
+                                                                    MaterialStateTextStyle.resolveWith(
+                                                                        (states) =>
+                                                                            Theme.of(context).textTheme.titleMedium ?? TextStyle()),
+                                                                columns: const [
+                                                                  DataColumn(
+                                                                      label: Text(
+                                                                          "Select")),
+                                                                  DataColumn(
+                                                                      label: Text(
+                                                                          "Ingredient")),
+                                                                  DataColumn(
+                                                                      label: Text(
+                                                                          "Farmer")),
+                                                                  DataColumn(
+                                                                      label: Text(
+                                                                          "Date of Purchase")),
+                                                                  DataColumn(
+                                                                      label: Text(
+                                                                          "Qty")),
+                                                                ],
+                                                                rows: productProvider.myPurchases
+                                                                    .where((element) => (int.tryParse(element["products"][0]["order_status_id"]) ?? 0) >= 4)
+                                                                    .fold<List<dynamic>>([], (previousValue, element) {
                                                                       var tempList =
                                                                           previousValue;
                                                                       (element.values.toList()[1] as List<
@@ -785,31 +787,37 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                                                     })
                                                                     .toList()
                                                                     .asMap()
-                                                                    .map((index,
-                                                                            e) =>
-                                                                        MapEntry(
-                                                                            index,
-                                                                            DataRow(color: MaterialStateColor.resolveWith((states) => Theme.of(context).colorScheme.primaryContainer.withOpacity(index % 2 == 0 ? 1.0 : 0.6)), cells: [
-                                                                              DataCell(Checkbox(
-                                                                                value: selectedIngredients.entries.where((element) => element.key == e["product_id"]).isNotEmpty ? selectedIngredients.entries.where((element) => element.key == e["product_id"]).first.value : false,
-                                                                                onChanged: (_) {
-                                                                                  setState(() {
-                                                                                    if (selectedIngredients.entries.where((element) => element.key == e["product_id"]).isNotEmpty) {
-                                                                                      selectedIngredients.remove(e["product_id"]);
-                                                                                    } else {
-                                                                                      selectedIngredients[e["product_id"]] = _ ?? !selectedIngredients.entries.where((element) => element.key == e["product_id"]).first.value;
-                                                                                    }
-                                                                                  });
-                                                                                },
-                                                                              )),
-                                                                              DataCell(Text(e["product_name"])),
-                                                                              DataCell(Text(capitalize(e["farmerName"]))),
-                                                                              DataCell(Text(DateFormat("hh:mm a, dd MMM yyyy").format(DateTime.fromMillisecondsSinceEpoch((int.tryParse(e["dateOfPurchase"]) ?? DateTime.now().millisecondsSinceEpoch) * 1000)))),
-                                                                              DataCell(Text(e["quantity"])),
-                                                                            ])))
+                                                                    .map((index, e) => MapEntry(
+                                                                        index,
+                                                                        DataRow(color: MaterialStateColor.resolveWith((states) => Theme.of(context).colorScheme.primaryContainer.withOpacity(index % 2 == 0 ? 1.0 : 0.6)), cells: [
+                                                                          DataCell(
+                                                                              Checkbox(
+                                                                            value: selectedIngredients.entries.where((element) => element.key == e["product_id"]).isNotEmpty
+                                                                                ? selectedIngredients.entries.where((element) => element.key == e["product_id"]).first.value
+                                                                                : false,
+                                                                            onChanged:
+                                                                                (_) {
+                                                                              setState(() {
+                                                                                if (selectedIngredients.entries.where((element) => element.key == e["product_id"]).isNotEmpty) {
+                                                                                  selectedIngredients.remove(e["product_id"]);
+                                                                                } else {
+                                                                                  selectedIngredients[e["product_id"]] = _ ?? !selectedIngredients.entries.where((element) => element.key == e["product_id"]).first.value;
+                                                                                }
+                                                                              });
+                                                                            },
+                                                                          )),
+                                                                          DataCell(
+                                                                              Text(e["product_name"])),
+                                                                          DataCell(
+                                                                              Text(capitalize(e["farmerName"]))),
+                                                                          DataCell(Text(DateFormat("hh:mm a, dd MMM yyyy").format(DateTime.fromMillisecondsSinceEpoch((int.tryParse(e["dateOfPurchase"]) ?? DateTime.now().millisecondsSinceEpoch) *
+                                                                              1000)))),
+                                                                          DataCell(
+                                                                              Text(e["quantity"])),
+                                                                        ])))
                                                                     .values
                                                                     .toList()),
-                                                      )
+                                                          )
                                                     : const SizedBox(),
                                                 Row(
                                                   children: [
@@ -830,15 +838,14 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                                                         .colorScheme
                                                                         .primary)),
                                                           ),
-                                                          dropdownColor: ElevationOverlay
-                                                              .colorWithOverlay(
-                                                                  Theme.of(context)
-                                                                      .colorScheme
-                                                                      .surface,
-                                                                  Theme.of(context)
-                                                                      .colorScheme
-                                                                      .primary,
-                                                                  2.0),
+                                                          dropdownColor: ElevationOverlay.colorWithOverlay(
+                                                              Theme.of(context)
+                                                                  .colorScheme
+                                                                  .surface,
+                                                              Theme.of(context)
+                                                                  .colorScheme
+                                                                  .primary,
+                                                              2.0),
                                                           isExpanded: true,
                                                           hint: Text(
                                                             'Units',
@@ -847,22 +854,31 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                                                 .textTheme
                                                                 .bodyMedium,
                                                           ),
-                                                          value: addProductController
-                                                              .selectedUnits,
+                                                          value:
+                                                              addProductController
+                                                                  .selectedUnits,
                                                           items: productProvider
-                                                              .units[addProductController
-                                                                  .selectedCategory]
-                                                              ?.map((key,
-                                                                      value) =>
-                                                                  MapEntry(
-                                                                      key,
-                                                                      DropdownMenuItem<
-                                                                          String>(
-                                                                        value:
-                                                                            value,
-                                                                        child: TextWidget(
-                                                                            value),
-                                                                      )))
+                                                              .units[loginProvider
+                                                                          .isFarmer ||
+                                                                      selectedIngredients
+                                                                          .isEmpty
+                                                                  ? addProductController
+                                                                      .selectedCategory
+                                                                  : (selectedIngredients.length > 1
+                                                                      ? "Weekly Basket"
+                                                                      : productProvider
+                                                                          .products
+                                                                          .where((element) => element.productId.toString() == selectedIngredients.keys.first)
+                                                                          .first
+                                                                          .category)]
+                                                              ?.map((key, value) => MapEntry(
+                                                                  key,
+                                                                  DropdownMenuItem<String>(
+                                                                    value:
+                                                                        value,
+                                                                    child: TextWidget(
+                                                                        value),
+                                                                  )))
                                                               .values
                                                               .toList(),
                                                           onChanged: (_) {
@@ -966,6 +982,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                                     ?.values
                                                     .toList() ??
                                                 [],
+                                            selectedIngredients,
                                             (_) {
                                               snackbar(context, _);
                                             },

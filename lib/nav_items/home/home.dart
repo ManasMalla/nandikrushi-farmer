@@ -48,163 +48,167 @@ class _HomeScreenState extends State<HomeScreen> {
         bottom: false,
         top: false,
         child:
-            Consumer<ProductProvider>(builder: (context, productProvider, _) {
-          return Container(
-            color: Theme.of(context).colorScheme.background,
-            padding: const EdgeInsets.only(top: 16.0),
-            child: Scaffold(
-              floatingActionButton: FloatingActionButton.extended(
-                backgroundColor: Theme.of(context).colorScheme.primary,
-                foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                onPressed: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => const AddProductScreen()));
-                },
-                label: const Text("Add Product"),
-                icon: const Icon(Icons.add_rounded),
-              ),
-              backgroundColor: Theme.of(context).colorScheme.background,
-              appBar: homeAppBar(context, widget.constraints),
-              body: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Container(
-                      //   decoration: BoxDecoration(
-                      //       color: Theme.of(context)
-                      //           .colorScheme
-                      //           .primary
-                      //           .withOpacity(0.15),
-                      //       borderRadius: BorderRadius.circular(16)),
-                      //   margin: const EdgeInsets.only(top: 8, bottom: 16),
-                      //   width: double.infinity,
-                      //   child: Center(
-                      //     child: Padding(
-                      //       padding: const EdgeInsets.symmetric(
-                      //           horizontal: 24.0, vertical: 8),
-                      //       child: Row(
-                      //         children: [
-                      //           Expanded(
-                      //             child: TextFieldWidget(
-                      //               onChanged: (_) {
-                      //                 setState(() {});
-                      //               },
-                      //               onSubmitField: () {
-                      //                 setState(() {});
-                      //               },
-                      //               textInputAction: TextInputAction.search,
-                      //               hint: "Search",
-                      //               controller: searchController,
-                      //               hintStyle: Theme.of(context)
-                      //                   .textTheme
-                      //                   .titleMedium
-                      //                   ?.copyWith(
-                      //                       color: Theme.of(context)
-                      //                           .colorScheme
-                      //                           .primary
-                      //                           .withOpacity(0.7)),
-                      //               shouldShowBorder: false,
-                      //               style: Theme.of(context)
-                      //                   .textTheme
-                      //                   .titleMedium
-                      //                   ?.copyWith(
-                      //                       color: Theme.of(context)
-                      //                           .colorScheme
-                      //                           .primary),
-                      //             ),
-                      //           ),
-                      //           InkWell(
-                      //             onTap: () async {
-                      //               print(await FirebaseMessaging.instance
-                      //                   .getToken());
-                      //               if (searchController
-                      //                   .value.text.isNotEmpty) {
-                      //                 setState(() {
-                      //                   searchController.value =
-                      //                       const TextEditingValue();
-                      //                 });
-                      //               }
-                      //             },
-                      //             child: Icon(
-                      //                 searchController.value.text.isNotEmpty
-                      //                     ? Icons.highlight_remove_rounded
-                      //                     : Icons.search_rounded,
-                      //                 color: Theme.of(context)
-                      //                     .colorScheme
-                      //                     .primary),
-                      //           ),
-                      //         ],
-                      //       ),
-                      //     ),
-                      //   ),
-                      // ),
-                      searchController.value.text.isEmpty
-                          ? Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    Text(
-                                      "Latest Around You",
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .titleLarge,
-                                    ),
-                                    const Spacer(),
-                                    TextButton(
-                                        onPressed: () {
-                                          Navigator.of(context).push(
-                                              MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      const VideosScreen()));
-                                        },
-                                        child: const Text("View More")),
-                                  ],
-                                ),
-                                const Opacity(
-                                  opacity: 0.6,
-                                  child: Text(
-                                      "Catch up on the latest going around you"),
-                                ),
-                                const SizedBox(
-                                  height: 16,
-                                ),
-                                homeVideoSection(),
-                                homeOrdersCard(context, productProvider),
-                                homeMyProductsCard(context, productProvider),
-                                homeMyPurchasesCard(context, productProvider),
-                              ],
-                            )
-                          //TODO: Implement the search functionality
-                          : Column(
-                              children: [
-                                Image.asset("assets/images/ic_searching.png"),
-                                const SizedBox(
-                                  height: 24,
-                                ),
-                                Text(
-                                  "Searching",
-                                  style:
-                                      Theme.of(context).textTheme.headlineSmall,
-                                ),
-                                const SizedBox(
-                                  height: 12,
-                                ),
-                                const Text(
-                                  "Looking over our humongous database\nof products and orders...",
-                                  textAlign: TextAlign.center,
-                                )
-                              ],
-                            ),
-                    ],
+            Consumer<ProfileProvider>(builder: (context, profileProvider, _) {
+          return Consumer<ProductProvider>(
+              builder: (context, productProvider, _) {
+            return Container(
+              color: Theme.of(context).colorScheme.background,
+              padding: const EdgeInsets.only(top: 16.0),
+              child: Scaffold(
+                floatingActionButton: FloatingActionButton.extended(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                  onPressed: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => const AddProductScreen()));
+                  },
+                  label: const Text("Add Product"),
+                  icon: const Icon(Icons.add_rounded),
+                ),
+                backgroundColor: Theme.of(context).colorScheme.background,
+                appBar: homeAppBar(context, widget.constraints),
+                body: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Container(
+                        //   decoration: BoxDecoration(
+                        //       color: Theme.of(context)
+                        //           .colorScheme
+                        //           .primary
+                        //           .withOpacity(0.15),
+                        //       borderRadius: BorderRadius.circular(16)),
+                        //   margin: const EdgeInsets.only(top: 8, bottom: 16),
+                        //   width: double.infinity,
+                        //   child: Center(
+                        //     child: Padding(
+                        //       padding: const EdgeInsets.symmetric(
+                        //           horizontal: 24.0, vertical: 8),
+                        //       child: Row(
+                        //         children: [
+                        //           Expanded(
+                        //             child: TextFieldWidget(
+                        //               onChanged: (_) {
+                        //                 setState(() {});
+                        //               },
+                        //               onSubmitField: () {
+                        //                 setState(() {});
+                        //               },
+                        //               textInputAction: TextInputAction.search,
+                        //               hint: "Search",
+                        //               controller: searchController,
+                        //               hintStyle: Theme.of(context)
+                        //                   .textTheme
+                        //                   .titleMedium
+                        //                   ?.copyWith(
+                        //                       color: Theme.of(context)
+                        //                           .colorScheme
+                        //                           .primary
+                        //                           .withOpacity(0.7)),
+                        //               shouldShowBorder: false,
+                        //               style: Theme.of(context)
+                        //                   .textTheme
+                        //                   .titleMedium
+                        //                   ?.copyWith(
+                        //                       color: Theme.of(context)
+                        //                           .colorScheme
+                        //                           .primary),
+                        //             ),
+                        //           ),
+                        //           InkWell(
+                        //             onTap: () async {
+                        //               print(await FirebaseMessaging.instance
+                        //                   .getToken());
+                        //               if (searchController
+                        //                   .value.text.isNotEmpty) {
+                        //                 setState(() {
+                        //                   searchController.value =
+                        //                       const TextEditingValue();
+                        //                 });
+                        //               }
+                        //             },
+                        //             child: Icon(
+                        //                 searchController.value.text.isNotEmpty
+                        //                     ? Icons.highlight_remove_rounded
+                        //                     : Icons.search_rounded,
+                        //                 color: Theme.of(context)
+                        //                     .colorScheme
+                        //                     .primary),
+                        //           ),
+                        //         ],
+                        //       ),
+                        //     ),
+                        //   ),
+                        // ),
+                        searchController.value.text.isEmpty
+                            ? Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Text(
+                                        "Latest Around You",
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleLarge,
+                                      ),
+                                      const Spacer(),
+                                      TextButton(
+                                          onPressed: () {
+                                            Navigator.of(context).push(
+                                                MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        const VideosScreen()));
+                                          },
+                                          child: const Text("View More")),
+                                    ],
+                                  ),
+                                  const Opacity(
+                                    opacity: 0.6,
+                                    child: Text(
+                                        "Catch up on the latest going around you"),
+                                  ),
+                                  const SizedBox(
+                                    height: 16,
+                                  ),
+                                  homeVideoSection(profileProvider.videos),
+                                  homeOrdersCard(context, productProvider),
+                                  homeMyProductsCard(context, productProvider),
+                                  homeMyPurchasesCard(context, productProvider),
+                                ],
+                              )
+                            //TODO: Implement the search functionality
+                            : Column(
+                                children: [
+                                  Image.asset("assets/images/ic_searching.png"),
+                                  const SizedBox(
+                                    height: 24,
+                                  ),
+                                  Text(
+                                    "Searching",
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headlineSmall,
+                                  ),
+                                  const SizedBox(
+                                    height: 12,
+                                  ),
+                                  const Text(
+                                    "Looking over our humongous database\nof products and orders...",
+                                    textAlign: TextAlign.center,
+                                  )
+                                ],
+                              ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-          );
+            );
+          });
         }),
       );
     });
