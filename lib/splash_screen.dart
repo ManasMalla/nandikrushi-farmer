@@ -6,37 +6,74 @@
 
 import 'dart:developer';
 
+import 'package:capped_progress_indicator/capped_progress_indicator.dart';
 import 'package:flutter/material.dart';
-import 'package:nandikrushi_farmer/onboarding/login/login_controller.dart';
-import 'package:nandikrushi_farmer/onboarding/login/login_provider.dart';
-import 'package:nandikrushi_farmer/reusable_widgets/text_widget.dart';
-import 'package:nandikrushi_farmer/utils/custom_color_util.dart';
-import 'package:nandikrushi_farmer/utils/login_utils.dart';
+import 'package:nandikrushi_farmer/color_schemes.dart';
+import 'package:nandikrushi_farmer/data/repository/local_user_repository.dart';
+import 'package:nandikrushi_farmer/data/repository/online_user_repository.dart';
+import 'package:nandikrushi_farmer/domain/enum/user_type.dart';
+import 'package:nandikrushi_farmer/domain/usecase/login_usecase.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'domain/enum/user_authentication_state.dart';
 
 class SplashScreen extends StatelessWidget {
-  const SplashScreen({Key? key}) : super(key: key);
+  final UserType userType;
+
+  const SplashScreen({Key? key, required this.userType}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    log(context.isDarkMode.toString());
-    LoginController loginPageController = LoginController();
-    LoginProvider loginProvider =
-        Provider.of<LoginProvider>(context, listen: false);
+    SharedPreferences.getInstance().then((sharedPreferences) {
+      final loginUseCase = LoginUseCase(
+          localUserRepository:
+              LocalUserRepository(sharedPreferences: sharedPreferences),
+          onlineUserRepository: OnlineUserRepository());
+      final isUserLoggedIn = loginUseCase.isUserLoggedIn();
+      switch (isUserLoggedIn) {
+        case UserAuthenticationState.phone:
+          Navigator.of(context).pushNamed("home-screen");
+          break;
+        case UserAuthenticationState.email:
+          Navigator.of(context).pushNamed("home-screen");
+          break;
+        case UserAuthenticationState.firebase:
+          final onlineUserAuthStatus =
+              OnlineUserRepository().checkIfUserIdExists();
+          switch (onlineUserAuthStatus.entries.first.key) {
+            case UserAuthStatus.verified:
+              loginUseCase.saveUserToLocalStorage(
+                  onlineUserAuthStatus.entries.first.value);
+              Navigator.of(context).pushNamed("home-screen");
+              break;
+            case UserAuthStatus.notVerified:
+              Navigator.of(context).pushNamed('not-verified');
+              break;
+            case UserAuthStatus.none:
+              Navigator.of(context).pushNamed('onboarding');
+              break;
+          }
+          break;
+        case UserAuthenticationState.none:
+          Navigator.of(context).pushNamed('onboarding');
+          break;
+      }
+    });
 
-    loginPageController.checkUser(
-      isReturningUserFuture: context.isReturningUser,
-      navigator: Navigator.of(context),
-      onNewUser: (onCompleted) {
-        loginPageController.getUserRegistrationData(context).then((_) {
-          LoginProvider provider =
-              Provider.of<LoginProvider>(context, listen: false);
-          provider.fetchUserTypes(_);
-          onCompleted();
-        });
-      },
-      loginProvider: loginProvider,
-    );
+    // loginPageController.checkUser(
+    //   isReturningUserFuture: context.isReturningUser,
+    //   navigator: Navigator.of(context),
+    //   onNewUser: (onCompleted) {
+    //     loginPageController.getUserRegistrationData(context).then((_) {
+    //       LoginProvider provider =
+    //           Provider.of<LoginProvider>(context, listen: false);
+    //       provider.fetchUserTypes(_);
+    //       onCompleted();
+    //     });
+    //   },
+    //   loginProvider: loginProvider,
+    // );
 
     return Scaffold(
       backgroundColor: ElevationOverlay.colorWithOverlay(
@@ -47,14 +84,25 @@ class SplashScreen extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Image.asset("assets/images/logo.png"),
-            TextWidget(
-              loginProvider.userAppTheme.key.toUpperCase(),
-              size: 12,
-              lSpace: loginProvider.userAppTheme.key.length > 10 ? 8 : 16,
-              color: context.isDarkMode
-                  ? Theme.of(context).colorScheme.onBackground
-                  : Theme.of(context).colorScheme.primary,
+            const Spacer(),
+            Image.asset(
+              userType == UserType.restaraunt
+                  ? "assets/images/logo-brown.png"
+                  : "assets/images/logo.png",
+            ),
+            Text(
+              userType.name.toUpperCase(),
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                    color: context.isDarkMode
+                        ? Theme.of(context).colorScheme.onBackground
+                        : Theme.of(context).colorScheme.primary,
+                    letterSpacing: userType.name.length > 8 ? 8 : 16,
+                  ),
+            ),
+            const Spacer(),
+            const CircularCappedProgressIndicator(strokeCap: StrokeCap.round),
+            const SizedBox(
+              height: 80,
             )
           ],
         ),
