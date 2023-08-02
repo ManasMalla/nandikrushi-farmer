@@ -46,6 +46,12 @@ class _AddProductScreenState extends State<AddProductScreen> {
             resizeToAvoidBottomInset: true,
             body: Consumer<ProfileProvider>(
                 builder: (context, profileProvider, _) {
+              print(productProvider.subcategories);
+              print(productProvider.storeCategories);
+              print(productProvider.storeSubCategories);
+              print(productProvider.storeUnits);
+              print(productProvider.products
+                  .map((element) => element.categoryId));
               return WillPopScope(
                 onWillPop: () {
                   productProvider.getAllProducts(
@@ -591,19 +597,21 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                                                   .colorScheme
                                                                   .primary,
                                                               2.0),
-                                                          value: loginProvider.isFarmer || selectedIngredients.isEmpty
+                                                          value: loginProvider.isFarmer ||
+                                                                  selectedIngredients
+                                                                      .isEmpty ||
+                                                                  selectedIngredients.length >
+                                                                      1
                                                               ? addProductController
                                                                   .selectedCategory
-                                                              : (selectedIngredients.length >
-                                                                      1
-                                                                  ? "Weekly Basket"
-                                                                  : productProvider
-                                                                      .products
-                                                                      .where((element) => element.productId.toString() == selectedIngredients.keys.first)
-                                                                      .first
-                                                                      .category),
+                                                              : productProvider
+                                                                  .products
+                                                                  .where((element) => element.productId.toString() == selectedIngredients.keys.first)
+                                                                  .first
+                                                                  .category,
                                                           items: selectedIngredients.isEmpty || selectedIngredients.length > 1
-                                                              ? productProvider.categories.keys
+                                                              ? (selectedIngredients.isEmpty ? productProvider.categories : productProvider.storeCategories)
+                                                                  .keys
                                                                   .map((e) => DropdownMenuItem(
                                                                         value:
                                                                             e,
@@ -631,7 +639,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                                                               .where((element) => element.productId.toString() == selectedIngredients.keys.first)
                                                                               .first
                                                                               .category ??
-                                                                          "Weekly Basket",
+                                                                          "Basket",
                                                                       style: Theme.of(
                                                                               context)
                                                                           .textTheme
@@ -674,35 +682,60 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                                                 .textTheme
                                                                 .bodyMedium,
                                                           ),
-                                                          dropdownColor: ElevationOverlay.colorWithOverlay(
-                                                              Theme.of(context)
-                                                                  .colorScheme
-                                                                  .surface,
-                                                              Theme.of(context)
-                                                                  .colorScheme
-                                                                  .primary,
-                                                              2.0),
-                                                          value: addProductController
-                                                              .selectedSubCategory,
-                                                          items: (productProvider
-                                                                      .subcategories[productProvider
-                                                                          .categories[loginProvider.isFarmer ||
-                                                                              selectedIngredients.isEmpty
-                                                                          ? addProductController.selectedCategory
-                                                                          : (selectedIngredients.length > 1 ? "Weekly Basket" : productProvider.products.where((element) => element.productId.toString() == selectedIngredients.keys.first).first.category)]]
-                                                                      ?.map((e) => e.keys.first) ??
-                                                                  [])
-                                                              .map((e) => DropdownMenuItem(
-                                                                    value: e,
+                                                          dropdownColor:
+                                                              ElevationOverlay.colorWithOverlay(
+                                                                  Theme.of(context)
+                                                                      .colorScheme
+                                                                      .surface,
+                                                                  Theme.of(context)
+                                                                      .colorScheme
+                                                                      .primary,
+                                                                  2.0),
+                                                          value: loginProvider.isFarmer || selectedIngredients.isEmpty || selectedIngredients.length > 1
+                                                              ? addProductController
+                                                                  .selectedSubCategory
+                                                              : productProvider
+                                                                  .products
+                                                                  .where((element) => element.productId.toString() == selectedIngredients.keys.first)
+                                                                  .first
+                                                                  .subcategory,
+                                                          items: selectedIngredients.isEmpty || selectedIngredients.length > 1
+                                                              ? (selectedIngredients.isEmpty ? (productProvider.subcategories[productProvider.categories[addProductController.selectedCategory]]?.map((e) => e.keys.first) ?? []) : (productProvider.storeSubCategories[productProvider.storeCategories[addProductController.selectedCategory]]?.keys.toList() ?? []))
+                                                                  .map((e) => DropdownMenuItem(
+                                                                        value:
+                                                                            e,
+                                                                        child:
+                                                                            Text(
+                                                                          e,
+                                                                          style: Theme.of(context)
+                                                                              .textTheme
+                                                                              .bodyMedium,
+                                                                        ),
+                                                                      ))
+                                                                  .toList()
+                                                              : [
+                                                                  DropdownMenuItem(
+                                                                    value: productProvider
+                                                                        .products
+                                                                        .where((element) =>
+                                                                            element.productId.toString() ==
+                                                                            selectedIngredients.keys.first)
+                                                                        .first
+                                                                        .subcategory,
                                                                     child: Text(
-                                                                      e,
+                                                                      productProvider
+                                                                              .products
+                                                                              .where((element) => element.productId.toString() == selectedIngredients.keys.first)
+                                                                              .first
+                                                                              .subcategory ??
+                                                                          "Basket",
                                                                       style: Theme.of(
                                                                               context)
                                                                           .textTheme
                                                                           .bodyMedium,
                                                                     ),
-                                                                  ))
-                                                              .toList(),
+                                                                  )
+                                                                ],
                                                           onChanged: (_) {
                                                             setState(() {
                                                               addProductController
@@ -798,6 +831,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                                                             onChanged:
                                                                                 (_) {
                                                                               setState(() {
+                                                                                addProductController.selectedCategory = null;
+                                                                                addProductController.selectedSubCategory = null;
                                                                                 if (selectedIngredients.entries.where((element) => element.key == e["product_id"]).isNotEmpty) {
                                                                                   selectedIngredients.remove(e["product_id"]);
                                                                                 } else {
@@ -838,14 +873,15 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                                                         .colorScheme
                                                                         .primary)),
                                                           ),
-                                                          dropdownColor: ElevationOverlay.colorWithOverlay(
-                                                              Theme.of(context)
-                                                                  .colorScheme
-                                                                  .surface,
-                                                              Theme.of(context)
-                                                                  .colorScheme
-                                                                  .primary,
-                                                              2.0),
+                                                          dropdownColor:
+                                                              ElevationOverlay.colorWithOverlay(
+                                                                  Theme.of(context)
+                                                                      .colorScheme
+                                                                      .surface,
+                                                                  Theme.of(context)
+                                                                      .colorScheme
+                                                                      .primary,
+                                                                  2.0),
                                                           isExpanded: true,
                                                           hint: Text(
                                                             'Units',
@@ -854,33 +890,51 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                                                 .textTheme
                                                                 .bodyMedium,
                                                           ),
-                                                          value:
-                                                              addProductController
-                                                                  .selectedUnits,
-                                                          items: productProvider
-                                                              .units[loginProvider
-                                                                          .isFarmer ||
-                                                                      selectedIngredients
-                                                                          .isEmpty
-                                                                  ? addProductController
-                                                                      .selectedCategory
-                                                                  : (selectedIngredients.length > 1
-                                                                      ? "Weekly Basket"
-                                                                      : productProvider
-                                                                          .products
-                                                                          .where((element) => element.productId.toString() == selectedIngredients.keys.first)
-                                                                          .first
-                                                                          .category)]
-                                                              ?.map((key, value) => MapEntry(
-                                                                  key,
-                                                                  DropdownMenuItem<String>(
-                                                                    value:
-                                                                        value,
-                                                                    child: TextWidget(
-                                                                        value),
-                                                                  )))
-                                                              .values
-                                                              .toList(),
+                                                          value: loginProvider.isFarmer ||
+                                                                  selectedIngredients
+                                                                      .isEmpty ||
+                                                                  selectedIngredients.length >
+                                                                      1
+                                                              ? addProductController
+                                                                  .selectedUnits
+                                                              : productProvider.products.where((element) => element.productId.toString() == selectedIngredients.keys.first).first.units,
+                                                          items: selectedIngredients.isEmpty || selectedIngredients.length > 1
+                                                              ? (selectedIngredients.isEmpty ? (productProvider.units[productProvider.categories[addProductController.selectedCategory]])?.values : (productProvider.storeUnits[productProvider.storeCategories[addProductController.selectedCategory]])?.values)
+                                                                  ?.map((e) => DropdownMenuItem(
+                                                                        value:
+                                                                            e,
+                                                                        child:
+                                                                            Text(
+                                                                          e,
+                                                                          style: Theme.of(context)
+                                                                              .textTheme
+                                                                              .bodyMedium,
+                                                                        ),
+                                                                      ))
+                                                                  .toList()
+                                                              : [
+                                                                  DropdownMenuItem(
+                                                                    value: productProvider
+                                                                        .products
+                                                                        .where((element) =>
+                                                                            element.productId.toString() ==
+                                                                            selectedIngredients.keys.first)
+                                                                        .first
+                                                                        .units,
+                                                                    child: Text(
+                                                                      productProvider
+                                                                              .products
+                                                                              .where((element) => element.productId.toString() == selectedIngredients.keys.first)
+                                                                              .first
+                                                                              .units ??
+                                                                          "BOX",
+                                                                      style: Theme.of(
+                                                                              context)
+                                                                          .textTheme
+                                                                          .bodyMedium,
+                                                                    ),
+                                                                  )
+                                                                ],
                                                           onChanged: (_) {
                                                             setState(() {
                                                               addProductController

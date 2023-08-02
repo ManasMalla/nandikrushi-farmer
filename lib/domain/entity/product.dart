@@ -21,6 +21,8 @@ class Product extends Equatable {
   final bool canBeSold;
   final String category;
   final int categoryId;
+  final String subcategory;
+  final int subCategoryId;
   final String produceLocation;
   final LatLng? produceCoordinates;
   final Seller seller;
@@ -38,6 +40,8 @@ class Product extends Equatable {
       required this.canBeSold,
       required this.category,
       required this.categoryId,
+      required this.subcategory,
+      required this.subCategoryId,
       required this.produceLocation,
       this.produceCoordinates,
       required this.seller,

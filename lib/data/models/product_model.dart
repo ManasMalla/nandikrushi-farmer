@@ -13,6 +13,8 @@ class ProductModel extends Equatable {
   final bool canBeSold;
   final String category;
   final int categoryId;
+  final String subcategory;
+  final int subCategoryId;
   final String produceLocation;
   final LatLng? produceCoordinates;
   final Seller seller;
@@ -30,6 +32,8 @@ class ProductModel extends Equatable {
       required this.canBeSold,
       required this.category,
       required this.categoryId,
+      required this.subcategory,
+      required this.subCategoryId,
       required this.produceLocation,
       this.produceCoordinates,
       required this.seller,
@@ -41,16 +45,15 @@ class ProductModel extends Equatable {
   List<Object?> get props => [productId, seller, canBeSold];
 
   factory ProductModel.fromJson(Map<String, dynamic> json, Map<String, int> allCategories) => ProductModel(
-      productId: int.tryParse(json["Products"][0]["product_id"]) ?? 0,
-      name: json["Products"][0]["product_name"].toString(),
-      description: json["Products"][0]["description"].toString(),
-      image: json["Products"][0]["image"].toString(),
-      price: (((double.tryParse(json["Products"][0]["final_price"].toString()) ?? 0.0) * 100).roundToDouble() /
+      productId: int.tryParse(json["Product"]["product_id"]) ?? 0,
+      name: json["Product"]["product_name"].toString(),
+      description: json["Product"]["description"].toString(),
+      image: json["Product"]["image"].toString(),
+      price: (((double.tryParse(json["Product"]["final_price"].toString()) ?? 0.0) * 100).roundToDouble() /
           100),
-      quantity: int.tryParse(json["Products"][0]["quantity"]) ?? 0,
-      units:
-          '${json["Products"][0]["min_purchase"]} ${json["Products"][0]["units"]}',
-      canBeSold: json["Products"][0]["verify_seller"] == "1",
+      quantity: int.tryParse(json["Product"]["quantity"]) ?? 0,
+      units: '${json["Product"]["min_purchase"]} ${json["Product"]["units"]}',
+      canBeSold: json["Product"]["verify_seller"] == "1",
       categoryId: int.tryParse(json["category"][0]["category_id"]) ?? 0,
       category: allCategories.entries
           .where((element) =>
@@ -58,6 +61,8 @@ class ProductModel extends Equatable {
               int.tryParse(json["category"][0]["category_id"] ?? "-1"))
           .first
           .key,
+      subCategoryId: int.tryParse(json["category"][0]["sub_category_id"]) ?? 0,
+      subcategory: json["category"][0]["sub_category_name"],
       produceLocation:
           "${json["vendor_details"][0]["location"]["mandal"]}, ${json["vendor_details"][0]["location"]["district"]}",
       seller: Seller(
@@ -69,9 +74,8 @@ class ProductModel extends Equatable {
               "${json["vendor_details"][0]["location"]["mandal"]}, ${json["vendor_details"][0]["location"]["district"]}",
           certificate: SellerCertificate.fromString(
               json["vendor_details"][0]["certificates"])),
-      aggregateRating:
-          (((double.tryParse(json["Products"][0]["aggregateRating"].toString()) ?? 0) * 2).round() /
-              2),
+      aggregateRating: (((double.tryParse(json["Product"]["aggregateRating"].toString()) ?? 0) * 2).round() /
+          2),
       reviews: [],
       produceCoordinates: !json["vendor_details"][0]["location"]["longitude"]
                   .toString()
@@ -93,6 +97,8 @@ class ProductModel extends Equatable {
       canBeSold: canBeSold,
       category: category,
       categoryId: categoryId,
+      subcategory: subcategory,
+      subCategoryId: subCategoryId,
       produceLocation: produceLocation,
       seller: seller,
       aggregateRating: aggregateRating,
