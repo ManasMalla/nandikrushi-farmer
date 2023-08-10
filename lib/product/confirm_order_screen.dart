@@ -229,7 +229,8 @@ class _ConfirmOrderScreenState extends State<ConfirmOrderScreen> {
 
                               log(response.body.toString());
 
-                              if (response.statusCode == 200) {
+                              if (response.statusCode == 200 &&
+                                  json.decode(response.body)["status"]) {
                                 if (radioState) {
                                   if (jsonDecode(response.body)["status"] ||
                                       jsonDecode(response.body)["status"]
@@ -298,9 +299,10 @@ class _ConfirmOrderScreenState extends State<ConfirmOrderScreen> {
                                 Navigator.of(context).pop();
                               } else {
                                 log("Error: ${response.statusCode}");
-                                snackbar(context, "Failed to get data!");
+
                                 profileProvider.hideLoader();
                                 Navigator.of(context).pop();
+                                snackbar(context, "Failed to get data!");
                               }
                             } else {
                               snackbar(

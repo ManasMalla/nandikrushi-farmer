@@ -123,12 +123,7 @@ class ProductProvider extends ChangeNotifier {
           categories = {};
           units = {};
           allCategories = {};
-          (jsonDecode(response.body)["message"])
-              .where((element) =>
-                  element["customer_group_id"].toString() ==
-                  profileProvider.customerGroupId)
-              .toList()
-              .forEach((e) {
+          (jsonDecode(response.body)["message"]).toList().forEach((e) {
             categories.addAll({
               capitalize(e["category_name"].toString().toLowerCase()):
                   int.tryParse(e["category_id"]) ?? 24

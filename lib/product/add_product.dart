@@ -1028,6 +1028,48 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                         });
                                         if (urls.isNotEmpty) {
                                           addProductController.addProduct(
+                                            (loginProvider.isFarmer ||
+                                                        selectedIngredients
+                                                            .isEmpty ||
+                                                        selectedIngredients
+                                                                .length >
+                                                            1
+                                                    ? addProductController
+                                                        .selectedCategory
+                                                    : productProvider.products
+                                                        .where((element) =>
+                                                            element.productId
+                                                                .toString() ==
+                                                            selectedIngredients
+                                                                .keys.first)
+                                                        .first
+                                                        .category) ??
+                                                "",
+                                            (loginProvider.isFarmer ||
+                                                        selectedIngredients
+                                                            .isEmpty ||
+                                                        selectedIngredients
+                                                                .length >
+                                                            1
+                                                    ? addProductController
+                                                        .selectedSubCategory
+                                                    : productProvider.products
+                                                        .where((element) =>
+                                                            element.productId
+                                                                .toString() ==
+                                                            selectedIngredients
+                                                                .keys.first)
+                                                        .first
+                                                        .subcategory) ??
+                                                "",
+                                                (loginProvider.isFarmer ||
+                                                                  selectedIngredients
+                                                                      .isEmpty ||
+                                                                  selectedIngredients.length >
+                                                                      1
+                                                              ? addProductController
+                                                                  .selectedUnits
+                                                              : productProvider.products.where((element) => element.productId.toString() == selectedIngredients.keys.first).first.units) ?? "",
                                             context,
                                             urls,
                                             productProvider

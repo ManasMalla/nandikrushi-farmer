@@ -828,7 +828,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                   weight: FontWeight.w700,
                                   size: height(context) * 0.02,
                                 )
-                              : OutlinedButton(
+                              : (int.tryParse(productProvider.myPurchases[widget.index]["products"]
+                                  [0]["order_status_id"]) ?? 0) > 2 ? SizedBox() : OutlinedButton(
                                   style: OutlinedButton.styleFrom(
                                       side: const BorderSide(
                                           color: Colors.red, width: 2),

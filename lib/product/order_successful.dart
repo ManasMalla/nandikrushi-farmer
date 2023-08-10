@@ -96,6 +96,11 @@ class _OrderSuccessfulScreenState extends State<OrderSuccessfulScreen> {
                         borderRadius: 8,
                         onClick: () async {
                           profileProvider.showLoader();
+                          productProvider.getCart(
+                              showMessage: (_) {
+                                snackbar(context, _, isError: false);
+                              },
+                              profileProvider: profileProvider);
                           productProvider.getOrders(
                               showMessage: (_) {
                                 snackbar(context, _, isError: false);

@@ -6,6 +6,7 @@
 
 import 'dart:developer';
 
+import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -33,6 +34,9 @@ class ProductController extends ControllerMVC {
   String? selectedSubCategory;
 
   addProduct(
+      String categoryAPI,
+      String subCategoryAPI,
+      String unitsAPI,
       BuildContext context,
       List<String> image,
       List<String> unitsList,
@@ -43,9 +47,9 @@ class ProductController extends ControllerMVC {
     LoginProvider loginProvider = Provider.of(context, listen: false);
     var data = {
       "name": formControllers['product-name']?.text,
-      "category": selectedCategory,
-      "subcategory": selectedSubCategory,
-      "unit": selectedUnits,
+      "category": categoryAPI,
+      "subcategory": subCategoryAPI,
+      "unit": unitsAPI,
       "quantity": formControllers['quantity']?.text,
       "price": formControllers['price']?.text,
       "description": formControllers['description']?.text
@@ -69,11 +73,14 @@ class ProductController extends ControllerMVC {
       return false;
     }
     var name = formControllers['product-name']?.text ?? "";
-    var category = selectedCategory ?? "";
+    var category = categoryAPI ?? "";
 
     var quantity = formControllers['quantity']?.text ?? "";
     var price = formControllers['price']?.text ?? "";
     var description = formControllers['description']?.text ?? "";
+    log(data.toString());
+    // print("{}-${productProvider.units[categoryAPI]?.entries}");
+    // print(productProvider.subcategories);
     // var product = Product(
     //     productName: name,
     //     category: category,
@@ -83,7 +90,8 @@ class ProductController extends ControllerMVC {
     //     quantity: int.tryParse(quantity) ?? 0,
     //     description: description,
     //     productImage: image[0]);
-
+    // profileProvider.hideLoader();
+    // return;
     //TODO: Remind sir to add subcategories
     Map<String, String> body = {
       "user_id": uid.toString(),
@@ -91,25 +99,37 @@ class ProductController extends ControllerMVC {
       "quantity": (int.tryParse(quantity) ?? 0).toString(),
       "price": (double.tryParse(price) ?? 0.0).toString(),
       "description": description.toString(),
-      "units": (productProvider.units[selectedCategory]?.entries
-              .firstWhere((element) => element.value == selectedUnits)
-              .key)
-          .toString(),
+      "units": 1.toString(),
       //"category_id": product.category.toString(),
-      "category_id": productProvider.categories[category].toString(),
-      "sub_category_id": productProvider
-              .subcategories[productProvider.categories[category]]
-              ?.where((element) => element.keys.first == selectedSubCategory)
+      "category_id": (productProvider.allCategories[category] ??
+              productProvider.storeCategories[category])
+          .toString(),
+      "sub_category_id": (productProvider
+                      .subcategories[productProvider.allCategories[categoryAPI]]
+                      ?.where((element) =>
+                          element.keys.first.toLowerCase() ==
+                          subCategoryAPI.toString().toLowerCase()) ??
+                  productProvider
+                      .subcategories[productProvider.storeCategories[category]]
+                      ?.where((element) =>
+                          element.keys.first.toLowerCase() ==
+                          subCategoryAPI.toLowerCase()))
+              ?.first
+              .values
+              .first
               .toString() ??
           "",
       "seller_id": profileProvider.sellerID,
     };
     if (!loginProvider.isFarmer) {
-      // ingredients.forEach((key, value) {
-      body.addAll({
-        "ingredients[0]":
-            {"product_id": 329, quantity: 1}.toString()
+      var igDataAPI =
+          ingredients.entries.where((element) => element.value).map((entry) {
+        // body.addAll({
+        return {"product_id": entry.key, quantity: 1}.toString();
         // });
+      }).toList();
+      igDataAPI.asMap().forEach((key, value) {
+        body.addAll({"ingredients[$key]": value});
       });
     }
     image.asMap().entries.forEach((_) {
@@ -117,6 +137,7 @@ class ProductController extends ControllerMVC {
     });
     log(image.asMap().entries.toString());
     log(body.toString());
+
     Server()
         .postFormData(
             body: body,
