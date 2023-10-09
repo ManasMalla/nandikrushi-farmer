@@ -8,12 +8,14 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart';
 import 'package:intl/intl.dart';
 import 'package:nandikrushi_farmer/domain/entity/product.dart';
 import 'package:nandikrushi_farmer/nav_items/profile_provider.dart';
+import 'package:nandikrushi_farmer/product/nk_category.dart';
 import 'package:nandikrushi_farmer/reusable_widgets/elevated_button.dart';
 import 'package:nandikrushi_farmer/reusable_widgets/snackbar.dart';
 import 'package:nandikrushi_farmer/reusable_widgets/text_widget.dart';
@@ -25,61 +27,15 @@ import '../utils/server.dart';
 class ProductProvider extends ChangeNotifier {
   var selectedIndex = 0;
 
-  Map<String, Map<String, String>> units = {
-    "Vegetables": {
-      "Kilogram": "kg",
-      "Gram": "g",
-      "Liter": "lt",
-      "Milliliter": "ml",
-      "Dozen": "dz"
-    }
-  };
-
   changeScreen(int _) {
     selectedIndex = _;
     notifyListeners();
   }
 
-  var categories = {
-    "A2 Milk": 17,
-    "Vegetables": 24,
-    "Fruits": 33,
-    "Ghee": 57,
-    "Oil": 20,
-    "Millets": 18,
-  };
-  var allCategories = {
-    "A2 Milk": 17,
-    "Vegetables": 24,
-    "Fruits": 33,
-    "Ghee": 57,
-    "Oil": 20,
-    "Millets": 18,
-  };
-  var subcategories = {
-    17: [
-      {"A2 Milk": 17}
-    ],
-    24: [
-      {"Vegetables": 24}
-    ],
-    33: [
-      {"Fruits": 33}
-    ],
-    57: [
-      {"Ghee": 57}
-    ],
-    20: [
-      {"Oil": 20}
-    ],
-    18: [
-      {"Millets": 18}
-    ],
-  };
-
-  Map<String, int> storeCategories = {};
-  Map<int, Map<String, int>> storeSubCategories = {};
-  Map<int, Map<String, String>> storeUnits = {};
+  List<NkCategory> categories = [];
+  // Map<String, int> storeCategories = {};
+  // Map<int, Map<String, int>> storeSubCategories = {};
+  // Map<int, Map<String, String>> storeUnits = {};
 
   List<Map<String, String>> cart = [];
   List<Product> products = [];
@@ -97,19 +53,227 @@ class ProductProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  getCategories(
+  // getCategories(
+  //     {required Function(String) showMessage,
+  //     required ProfileProvider profileProvider,
+  //     bool isFromNavHost = false}) async {
+  //   profileProvider.fetchingDataType = "fetch the categories";
+  //   notifyListeners();
+  //   profileProvider.showLoader();
+  //   var url =
+  //       "https://nkweb.sweken.com/index.php?route=extension/account/purpletree_multivendor/api/getcategories";
+  //   var response = await Server().getMethodParams(url);
+  //   if (response == null) {
+  //     showMessage("Failed to get a response from the server!");
+  //     //hideLoader();
+  //     if (Platform.isAndroid) {
+  //       SystemNavigator.pop();
+  //     } else if (Platform.isIOS) {
+  //       exit(0);
+  //     }
+  //     return;
+  //   }
+  //   if (response.statusCode == 200) {
+  //     try {
+  //       if (jsonDecode(response.body)["status"]) {
+  //         categories = {};
+  //         units = {};
+  //         allCategories = {};
+  //         (jsonDecode(response.body)["message"]).toList().forEach((e) {
+  //           categories.addAll({
+  //             capitalize(e["category_name"].toString().toLowerCase()):
+  //                 int.tryParse(e["category_id"]) ?? 24
+  //           });
+  //           Map<String, String> tempUnitsMap = {};
+  //           if (e["units"] != null) {
+  //             e["units"].forEach((el) {
+  //               tempUnitsMap
+  //                   .addAll({el["id"].toString(): el["title"] ?? "units"});
+  //             });
+  //             units[capitalize(e["category_name"].toString().toLowerCase())] =
+  //                 tempUnitsMap;
+  //           }
+  //         });
+  //         //get all categories
+  //         (jsonDecode(response.body)["message"]).toList().forEach((e) {
+  //           allCategories.addAll({
+  //             capitalize(e["category_name"].toString().toLowerCase()):
+  //                 int.tryParse(e["category_id"]) ?? 24
+  //           });
+  //         });
+  //         //if ca..tegories are empty for user group
+  //         if (categories.isEmpty) {
+  //           categories = profileProvider.customerGroupId == 3.toString()
+  //               ? {"Flours": 0}
+  //               : profileProvider.customerGroupId == 2.toString()
+  //                   ? {"Vegetables": 24}
+  //                   : {"Breakfast": 0};
+  //           allCategories = {"Flours": 0, "Vegetables": 24, "Breakfast": 0};
+  //           units = profileProvider.customerGroupId == 3.toString()
+  //               ? {
+  //                   "Flours": {"kilograms": "kgs"}
+  //                 }
+  //               : profileProvider.customerGroupId == 2.toString()
+  //                   ? {
+  //                       "Vegetables": {"kilograms": "kgs"}
+  //                     }
+  //                   : {
+  //                       "Breakfast": {"plates": "plates"}
+  //                     };
+  //         }
+  //       } else {
+  //         showMessage("Error fetching categories 1!");
+  //         profileProvider.hideLoader();
+  //         notifyListeners();
+  //       }
+
+  //       notifyListeners();
+  //     } on Exception catch (e) {
+  //       showMessage("Error fetching categories - 2: $e");
+  //       profileProvider.hideLoader();
+  //       notifyListeners();
+  //     }
+  //   } else if (response.statusCode == 400) {
+  //     showMessage("Undefined parameter when calling API");
+  //     if (Platform.isAndroid) {
+  //       SystemNavigator.pop();
+  //     } else if (Platform.isIOS) {
+  //       exit(0);
+  //     }
+  //   } else if (response.statusCode == 404) {
+  //     showMessage("API not found");
+  //     if (Platform.isAndroid) {
+  //       SystemNavigator.pop();
+  //     } else if (Platform.isIOS) {
+  //       exit(0);
+  //     }
+  //   } else {
+  //     showMessage("Failed to get data!");
+  //     if (Platform.isAndroid) {
+  //       SystemNavigator.pop();
+  //     } else if (Platform.isIOS) {
+  //       exit(0);
+  //     }
+  //   }
+  // }
+
+  // getSubCategories(
+  //     {required Function(String) showMessage,
+  //     required ProfileProvider profileProvider,
+  //     bool isFromNavHost = false}) async {
+  //   await getStoreBasketCategories(
+  //       showMessage: showMessage, profileProvider: profileProvider);
+  //   profileProvider.showLoader();
+
+  //   profileProvider.fetchingDataType = "fetch the subcategories";
+  //   notifyListeners();
+  //   var url =
+  //       "https://nkweb.sweken.com/index.php?route=extension/account/purpletree_multivendor/api/getsubcategories";
+  //   var response = await Server().getMethodParams(url);
+  //   if (response == null) {
+  //     showMessage("Failed to get a response from the server!");
+  //     //hideLoader();
+  //     if (Platform.isAndroid) {
+  //       SystemNavigator.pop();
+  //     } else if (Platform.isIOS) {
+  //       exit(0);
+  //     }
+  //     return;
+  //   }
+  //   if (response.statusCode == 200) {
+  //     try {
+  //       if (jsonDecode(response.body)["status"]) {
+  //         subcategories = {};
+  //         (jsonDecode(response.body)["message"])
+  //             .where(
+  //                 (element) => element["customer_group_id"].toString() == "2")
+  //             .toList()
+  //             .forEach((e) {
+  //           if (subcategories.isNotEmpty &&
+  //               (subcategories[int.tryParse(e["parent_id"]) ?? 0]?.isNotEmpty ??
+  //                   false)) {
+  //             subcategories[int.tryParse(e["parent_id"]) ?? 0]!.add({
+  //               capitalize(e["sub_category_name"].toString().toLowerCase()):
+  //                   int.tryParse(e["sub_category_id"]) ?? 62
+  //             });
+  //           } else {
+  //             subcategories.addAll({
+  //               int.tryParse(e["parent_id"]) ?? 0: [
+  //                 {
+  //                   capitalize(e["sub_category_name"].toString().toLowerCase()):
+  //                       int.tryParse(e["sub_category_id"]) ?? 62
+  //                 }
+  //               ]
+  //             });
+  //           }
+  //         });
+  //         if (subcategories.isEmpty) {
+  //           subcategories = profileProvider.customerGroupId == 3.toString()
+  //               ? {
+  //                   0: [
+  //                     {"Atta": 0}
+  //                   ]
+  //                 }
+  //               : profileProvider.customerGroupId == 2.toString()
+  //                   ? {
+  //                       24: [
+  //                         {"Leafy Vegetables": 0}
+  //                       ]
+  //                     }
+  //                   : {
+  //                       0: [
+  //                         {"Idli": 0}
+  //                       ]
+  //                     };
+  //         }
+  //       } else {
+  //         showMessage("Error fetching subcategories -2 !");
+  //         profileProvider.hideLoader();
+  //         notifyListeners();
+  //       }
+
+  //       notifyListeners();
+  //     } on Exception catch (e) {
+  //       showMessage("Error fetching subcategories: $e");
+  //       profileProvider.hideLoader();
+  //       notifyListeners();
+  //     }
+  //   } else if (response.statusCode == 400) {
+  //     showMessage("Undefined parameter when calling API");
+  //     if (Platform.isAndroid) {
+  //       SystemNavigator.pop();
+  //     } else if (Platform.isIOS) {
+  //       exit(0);
+  //     }
+  //   } else if (response.statusCode == 404) {
+  //     showMessage("API not found");
+  //     if (Platform.isAndroid) {
+  //       SystemNavigator.pop();
+  //     } else if (Platform.isIOS) {
+  //       exit(0);
+  //     }
+  //   } else {
+  //     showMessage("Failed to get data!");
+  //     if (Platform.isAndroid) {
+  //       SystemNavigator.pop();
+  //     } else if (Platform.isIOS) {
+  //       exit(0);
+  //     }
+  //   }
+  // }
+
+  getAllCategories(
       {required Function(String) showMessage,
       required ProfileProvider profileProvider,
       bool isFromNavHost = false}) async {
-    profileProvider.fetchingDataType = "fetch the categories";
-    notifyListeners();
     profileProvider.showLoader();
+    profileProvider.fetchingDataType = "fetch all the categories";
+    notifyListeners();
     var url =
-        "https://nkweb.sweken.com/index.php?route=extension/account/purpletree_multivendor/api/getcategories";
+        "https://nkweb.sweken.com/index.php?route=extension/account/purpletree_multivendor/api/getallcategories";
     var response = await Server().getMethodParams(url);
     if (response == null) {
       showMessage("Failed to get a response from the server!");
-      //hideLoader();
       if (Platform.isAndroid) {
         SystemNavigator.pop();
       } else if (Platform.isIOS) {
@@ -119,65 +283,68 @@ class ProductProvider extends ChangeNotifier {
     }
     if (response.statusCode == 200) {
       try {
-        if (jsonDecode(response.body)["status"]) {
-          categories = {};
-          units = {};
-          allCategories = {};
-          (jsonDecode(response.body)["message"]).toList().forEach((e) {
-            categories.addAll({
-              capitalize(e["category_name"].toString().toLowerCase()):
-                  int.tryParse(e["category_id"]) ?? 24
-            });
-            Map<String, String> tempUnitsMap = {};
-            if (e["units"] != null) {
-              e["units"].forEach((el) {
-                tempUnitsMap
-                    .addAll({el["id"].toString(): el["title"] ?? "units"});
-              });
-              units[capitalize(e["category_name"].toString().toLowerCase())] =
-                  tempUnitsMap;
-            }
-          });
-          //get all categories
-          (jsonDecode(response.body)["message"]).toList().forEach((e) {
-            allCategories.addAll({
-              capitalize(e["category_name"].toString().toLowerCase()):
-                  int.tryParse(e["category_id"]) ?? 24
-            });
-          });
-          //if categories are empty for user group
-          if (categories.isEmpty) {
-            categories = profileProvider.customerGroupId == 3.toString()
-                ? {"Flours": 0}
-                : profileProvider.customerGroupId == 2.toString()
-                    ? {"Vegetables": 24}
-                    : {"Breakfast": 0};
-            allCategories = {"Flours": 0, "Vegetables": 24, "Breakfast": 0};
-            units = profileProvider.customerGroupId == 3.toString()
-                ? {
-                    "Flours": {"kilograms": "kgs"}
-                  }
-                : profileProvider.customerGroupId == 2.toString()
-                    ? {
-                        "Vegetables": {"kilograms": "kgs"}
-                      }
-                    : {
-                        "Breakfast": {"plates": "plates"}
-                      };
-          }
+        final result = json.decode(response.body);
+        if (result["status"]) {
+          //TODO handle success
+          profileProvider.hideLoader();
+          final rawCategories = groupBy(result["message"] as List<dynamic>,
+              (dynamic obj) => obj["category_id"]);
+
+          categories = rawCategories.entries.map(
+            (entry) {
+              final categoryId = int.parse(entry.key);
+              final listOfSubcategories = entry.value;
+              final category = listOfSubcategories.first;
+              final List<NkUnit> categoryUnits =
+                  (category["category_units"] as List<dynamic>)
+                      .map(
+                        (f) => NkUnit(
+                          id: int.parse(f["id"]),
+                          title: f["title"],
+                          unit: f["title_unit"],
+                        ),
+                      )
+                      .toList();
+
+              return NkCategory(
+                customerGroupId: int.parse(category["customer_group_id"]),
+                categoryId: categoryId,
+                categoryName: category["category_name"],
+                categoryUnits: categoryUnits,
+                subCategories: listOfSubcategories.map((subcategory) {
+                  final List<NkUnit> subcategoryUnits =
+                      (subcategory["sub_category_units"] as List<dynamic>?)
+                              ?.map(
+                                (f) => NkUnit(
+                                  id: int.parse(f["id"]),
+                                  title: f["title"],
+                                  unit: f["title_unit"],
+                                ),
+                              )
+                              .toList() ??
+                          [];
+                  return NkSubCategory(
+                      subcategoryId: int.parse(subcategory["sub_category_id"]),
+                      subcategoryName: subcategory["sub_category_name"],
+                      subcategoryUnits: subcategoryUnits);
+                }).toList(),
+              );
+            },
+          ).toList();
         } else {
-          showMessage("Error fetching categories 1!");
+          showMessage("Error fetching categories!");
           profileProvider.hideLoader();
           notifyListeners();
         }
 
         notifyListeners();
       } on Exception catch (e) {
-        showMessage("Error fetching categories - 2: $e");
+        showMessage("Error fetching categories: $e");
         profileProvider.hideLoader();
         notifyListeners();
       }
     } else if (response.statusCode == 400) {
+      print("Get All Product: 400");
       showMessage("Undefined parameter when calling API");
       if (Platform.isAndroid) {
         SystemNavigator.pop();
@@ -185,6 +352,7 @@ class ProductProvider extends ChangeNotifier {
         exit(0);
       }
     } else if (response.statusCode == 404) {
+      print("Get All Product: 404");
       showMessage("API not found");
       if (Platform.isAndroid) {
         SystemNavigator.pop();
@@ -192,6 +360,7 @@ class ProductProvider extends ChangeNotifier {
         exit(0);
       }
     } else {
+      print("Get All Product: ${response.statusCode}");
       showMessage("Failed to get data!");
       if (Platform.isAndroid) {
         SystemNavigator.pop();
@@ -201,205 +370,100 @@ class ProductProvider extends ChangeNotifier {
     }
   }
 
-  getSubCategories(
-      {required Function(String) showMessage,
-      required ProfileProvider profileProvider,
-      bool isFromNavHost = false}) async {
-    await getStoreBasketCategories(
-        showMessage: showMessage, profileProvider: profileProvider);
-    profileProvider.showLoader();
+  // getStoreBasketCategories(
+  //     {required Function(String) showMessage,
+  //     required ProfileProvider profileProvider,
+  //     bool isFromNavHost = false}) async {
+  //   if (profileProvider.customerGroupId != "3") {
+  //     return;
+  //   }
+  //   profileProvider.showLoader();
 
-    profileProvider.fetchingDataType = "fetch the subcategories";
-    notifyListeners();
-    var url =
-        "https://nkweb.sweken.com/index.php?route=extension/account/purpletree_multivendor/api/getsubcategories";
-    var response = await Server().getMethodParams(url);
-    if (response == null) {
-      showMessage("Failed to get a response from the server!");
-      //hideLoader();
-      if (Platform.isAndroid) {
-        SystemNavigator.pop();
-      } else if (Platform.isIOS) {
-        exit(0);
-      }
-      return;
-    }
-    if (response.statusCode == 200) {
-      try {
-        if (jsonDecode(response.body)["status"]) {
-          subcategories = {};
-          (jsonDecode(response.body)["message"])
-              .where(
-                  (element) => element["customer_group_id"].toString() == "2")
-              .toList()
-              .forEach((e) {
-            if (subcategories.isNotEmpty &&
-                (subcategories[int.tryParse(e["parent_id"]) ?? 0]?.isNotEmpty ??
-                    false)) {
-              subcategories[int.tryParse(e["parent_id"]) ?? 0]!.add({
-                capitalize(e["sub_category_name"].toString().toLowerCase()):
-                    int.tryParse(e["sub_category_id"]) ?? 62
-              });
-            } else {
-              subcategories.addAll({
-                int.tryParse(e["parent_id"]) ?? 0: [
-                  {
-                    capitalize(e["sub_category_name"].toString().toLowerCase()):
-                        int.tryParse(e["sub_category_id"]) ?? 62
-                  }
-                ]
-              });
-            }
-          });
-          if (subcategories.isEmpty) {
-            subcategories = profileProvider.customerGroupId == 3.toString()
-                ? {
-                    0: [
-                      {"Atta": 0}
-                    ]
-                  }
-                : profileProvider.customerGroupId == 2.toString()
-                    ? {
-                        24: [
-                          {"Leafy Vegetables": 0}
-                        ]
-                      }
-                    : {
-                        0: [
-                          {"Idli": 0}
-                        ]
-                      };
-          }
-        } else {
-          showMessage("Error fetching subcategories -2 !");
-          profileProvider.hideLoader();
-          notifyListeners();
-        }
+  //   profileProvider.fetchingDataType = "fetch the subcategories";
+  //   notifyListeners();
+  //   var url =
+  //       "https://nkweb.sweken.com/index.php?route=extension/account/purpletree_multivendor/api/getstorebasketcategory";
+  //   var response = await Server().getMethodParams(url);
+  //   if (response == null) {
+  //     showMessage("Failed to get a response from the server!");
+  //     //hideLoader();
+  //     if (Platform.isAndroid) {
+  //       SystemNavigator.pop();
+  //     } else if (Platform.isIOS) {
+  //       exit(0);
+  //     }
+  //     return;
+  //   }
+  //   if (response.statusCode == 200) {
+  //     try {
+  //       if (jsonDecode(response.body)["status"]) {
+  //         storeCategories = {};
+  //         storeSubCategories = {};
+  //         (json.decode(response.body)["message"] as List<dynamic>)
+  //             .forEach((element) {
+  //           final parentId = int.parse(element["parent_id"]);
+  //           storeCategories.addAll({element["category_name"]: parentId});
+  //           if (storeSubCategories.containsKey(parentId)) {
+  //             storeSubCategories[parentId]!.addAll({
+  //               element["sub_category_name"]:
+  //                   int.parse(element["sub_category_id"])
+  //             });
+  //           } else {
+  //             storeSubCategories.addAll({
+  //               parentId: {
+  //                 element["sub_category_name"]:
+  //                     int.parse(element["sub_category_id"])
+  //               }
+  //             });
+  //           }
+  //           if (!storeUnits.containsKey(parentId)) {
+  //             (element["units"] as List<dynamic>).forEach((unitElement) {
+  //               if (storeUnits.containsKey(parentId)) {
+  //                 storeUnits[parentId]!.addAll(
+  //                     {unitElement["title"]: unitElement["title_unit"]});
+  //               } else {
+  //                 storeUnits.addAll({
+  //                   parentId: {unitElement["title"]: unitElement["title_unit"]}
+  //                 });
+  //               }
+  //             });
+  //           }
+  //         });
+  //       } else {
+  //         showMessage("Error fetching subcategories -2 !");
+  //         profileProvider.hideLoader();
+  //         notifyListeners();
+  //       }
 
-        notifyListeners();
-      } on Exception catch (e) {
-        showMessage("Error fetching subcategories: $e");
-        profileProvider.hideLoader();
-        notifyListeners();
-      }
-    } else if (response.statusCode == 400) {
-      showMessage("Undefined parameter when calling API");
-      if (Platform.isAndroid) {
-        SystemNavigator.pop();
-      } else if (Platform.isIOS) {
-        exit(0);
-      }
-    } else if (response.statusCode == 404) {
-      showMessage("API not found");
-      if (Platform.isAndroid) {
-        SystemNavigator.pop();
-      } else if (Platform.isIOS) {
-        exit(0);
-      }
-    } else {
-      showMessage("Failed to get data!");
-      if (Platform.isAndroid) {
-        SystemNavigator.pop();
-      } else if (Platform.isIOS) {
-        exit(0);
-      }
-    }
-  }
-
-  getStoreBasketCategories(
-      {required Function(String) showMessage,
-      required ProfileProvider profileProvider,
-      bool isFromNavHost = false}) async {
-    if (profileProvider.customerGroupId != "3") {
-      return;
-    }
-    profileProvider.showLoader();
-
-    profileProvider.fetchingDataType = "fetch the subcategories";
-    notifyListeners();
-    var url =
-        "https://nkweb.sweken.com/index.php?route=extension/account/purpletree_multivendor/api/getstorebasketcategory";
-    var response = await Server().getMethodParams(url);
-    if (response == null) {
-      showMessage("Failed to get a response from the server!");
-      //hideLoader();
-      if (Platform.isAndroid) {
-        SystemNavigator.pop();
-      } else if (Platform.isIOS) {
-        exit(0);
-      }
-      return;
-    }
-    if (response.statusCode == 200) {
-      try {
-        if (jsonDecode(response.body)["status"]) {
-          storeCategories = {};
-          storeSubCategories = {};
-          (json.decode(response.body)["message"] as List<dynamic>)
-              .forEach((element) {
-            final parentId = int.parse(element["parent_id"]);
-            storeCategories.addAll({element["category_name"]: parentId});
-            if (storeSubCategories.containsKey(parentId)) {
-              storeSubCategories[parentId]!.addAll({
-                element["sub_category_name"]:
-                    int.parse(element["sub_category_id"])
-              });
-            } else {
-              storeSubCategories.addAll({
-                parentId: {
-                  element["sub_category_name"]:
-                      int.parse(element["sub_category_id"])
-                }
-              });
-            }
-            if (!storeUnits.containsKey(parentId)) {
-              (element["units"] as List<dynamic>).forEach((unitElement) {
-                if (storeUnits.containsKey(parentId)) {
-                  storeUnits[parentId]!.addAll(
-                      {unitElement["title"]: unitElement["title_unit"]});
-                } else {
-                  storeUnits.addAll({
-                    parentId: {unitElement["title"]: unitElement["title_unit"]}
-                  });
-                }
-              });
-            }
-          });
-        } else {
-          showMessage("Error fetching subcategories -2 !");
-          profileProvider.hideLoader();
-          notifyListeners();
-        }
-
-        notifyListeners();
-      } on Exception catch (e) {
-        showMessage("Error fetching subcategories: $e");
-        profileProvider.hideLoader();
-        notifyListeners();
-      }
-    } else if (response.statusCode == 400) {
-      showMessage("Undefined parameter when calling API");
-      if (Platform.isAndroid) {
-        SystemNavigator.pop();
-      } else if (Platform.isIOS) {
-        exit(0);
-      }
-    } else if (response.statusCode == 404) {
-      showMessage("API not found");
-      if (Platform.isAndroid) {
-        SystemNavigator.pop();
-      } else if (Platform.isIOS) {
-        exit(0);
-      }
-    } else {
-      showMessage("Failed to get data!");
-      if (Platform.isAndroid) {
-        SystemNavigator.pop();
-      } else if (Platform.isIOS) {
-        exit(0);
-      }
-    }
-  }
+  //       notifyListeners();
+  //     } on Exception catch (e) {
+  //       showMessage("Error fetching subcategories: $e");
+  //       profileProvider.hideLoader();
+  //       notifyListeners();
+  //     }
+  //   } else if (response.statusCode == 400) {
+  //     showMessage("Undefined parameter when calling API");
+  //     if (Platform.isAndroid) {
+  //       SystemNavigator.pop();
+  //     } else if (Platform.isIOS) {
+  //       exit(0);
+  //     }
+  //   } else if (response.statusCode == 404) {
+  //     showMessage("API not found");
+  //     if (Platform.isAndroid) {
+  //       SystemNavigator.pop();
+  //     } else if (Platform.isIOS) {
+  //       exit(0);
+  //     }
+  //   } else {
+  //     showMessage("Failed to get data!");
+  //     if (Platform.isAndroid) {
+  //       SystemNavigator.pop();
+  //     } else if (Platform.isIOS) {
+  //       exit(0);
+  //     }
+  //   }
+  // }
 
   cancelOrder(BuildContext context,
       {required ProfileProvider profileProvider, required ordId}) async {
@@ -536,103 +600,103 @@ class ProductProvider extends ChangeNotifier {
     profileProvider.hideLoader();
   }
 
-  getAllProducts(
-      {required Function(String) showMessage,
-      required ProfileProvider profileProvider,
-      bool isFromNavHost = false}) async {
-    profileProvider.fetchingDataType = "fetch our products";
-    notifyListeners();
-    profileProvider.showLoader();
-    var url =
-        // profileProvider.customerGroupId == "3"
-        // ? "https://nkweb.sweken.com/index.php?route=extension/account/purpletree_multivendor/api/getallapprovedfarmerproducts":
-        "https://nkweb.sweken.com/index.php?route=extension/account/purpletree_multivendor/api/getallproducts";
-    var response = await Server().getMethodParams(url);
-    if (response == null) {
-      showMessage("Failed to get a response from the server!");
-      //hideLoader();
-      if (Platform.isAndroid) {
-        SystemNavigator.pop();
-      } else if (Platform.isIOS) {
-        exit(0);
-      }
-      return;
-    }
-    if (response.statusCode == 200) {
-      try {
-        List<dynamic> decodedResponse =
-            (jsonDecode(response.body)["Products"] as List<dynamic>)
-                .where(
-                  (element) =>
-                      element["Product"]["verify_seller"] == "1" &&
-                      (profileProvider.customerGroupId == "3"
-                          ? element["vendor_details"][0]["type"] == "2"
-                          : profileProvider.customerGroupId == "4"
-                              ? (element["vendor_details"][0]["type"] == "2" ||
-                                  element["vendor_details"][0]["type"] == "3")
-                              : true),
-                )
-                .toList();
-        products = [];
+  // getAllProducts(
+  //     {required Function(String) showMessage,
+  //     required ProfileProvider profileProvider,
+  //     bool isFromNavHost = false}) async {
+  //   profileProvider.fetchingDataType = "fetch our products";
+  //   notifyListeners();
+  //   profileProvider.showLoader();
+  //   var url =
+  //       // profileProvider.customerGroupId == "3"
+  //       // ? "https://nkweb.sweken.com/index.php?route=extension/account/purpletree_multivendor/api/getallapprovedfarmerproducts":
+  //       "https://nkweb.sweken.com/index.php?route=extension/account/purpletree_multivendor/api/getallproducts";
+  //   var response = await Server().getMethodParams(url);
+  //   if (response == null) {
+  //     showMessage("Failed to get a response from the server!");
+  //     //hideLoader();
+  //     if (Platform.isAndroid) {
+  //       SystemNavigator.pop();
+  //     } else if (Platform.isIOS) {
+  //       exit(0);
+  //     }
+  //     return;
+  //   }
+  //   if (response.statusCode == 200) {
+  //     try {
+  //       List<dynamic> decodedResponse =
+  //           (jsonDecode(response.body)["Products"] as List<dynamic>)
+  //               .where(
+  //                 (element) =>
+  //                     element["Product"]["verify_seller"] == "1" &&
+  //                     (profileProvider.customerGroupId == "3"
+  //                         ? element["vendor_details"][0]["type"] == "2"
+  //                         : profileProvider.customerGroupId == "4"
+  //                             ? (element["vendor_details"][0]["type"] == "2" ||
+  //                                 element["vendor_details"][0]["type"] == "3")
+  //                             : true),
+  //               )
+  //               .toList();
+  //       products = [];
 
-        for (var e in decodedResponse) {
-          if (allCategories.entries
-              .where((element) =>
-                  element.value ==
-                  int.tryParse(e["category"][0]["category_id"] ?? "-1"))
-              .isNotEmpty) {
-            var product = ProductModel.fromJson(e, allCategories).toEntity();
+  //       for (var e in decodedResponse) {
+  //         if (allCategories.entries
+  //             .where((element) =>
+  //                 element.value ==
+  //                 int.tryParse(e["category"][0]["category_id"] ?? "-1"))
+  //             .isNotEmpty) {
+  //           var product = ProductModel.fromJson(e, allCategories).toEntity();
 
-            // 'customer_ratings': jsonEncode(e["Products"][0]["rating"]),
-            //TODO Replace sellerID with actual data and certificate and add reviews
+  //           // 'customer_ratings': jsonEncode(e["Products"][0]["rating"]),
+  //           //TODO Replace sellerID with actual data and certificate and add reviews
 
-            log("12Prod->$product ,; $e");
-            products.add(product);
-          }
-        }
-        products = products.toSet().toList();
+  //           log("12Prod->$product ,; $e");
+  //           products.add(product);
+  //         }
+  //       }
+  //       products = products.toSet().toList();
 
-        for (var element in allCategories.keys) {
-          categorizedProducts[element] = [];
-          for (var product in products) {
-            if (product.category == element) {
-              categorizedProducts[element]?.add(product);
-            }
-          }
-        }
-        notifyListeners();
-        await getMyProducts(
-            showMessage: showMessage,
-            profileProvider: profileProvider,
-            isFromNavHost: isFromNavHost);
-      } on Exception catch (e) {
-        showMessage("Error fetching all products: $e");
-        profileProvider.hideLoader();
-        notifyListeners();
-      }
-    } else if (response.statusCode == 400) {
-      showMessage("Undefined parameter when calling API");
-      if (Platform.isAndroid) {
-        SystemNavigator.pop();
-      } else if (Platform.isIOS) {
-        exit(0);
-      }
-    } else if (response.statusCode == 404) {
-      showMessage("API not found");
-      if (Platform.isAndroid) {
-        SystemNavigator.pop();
-      } else if (Platform.isIOS) {
-        exit(0);
-      }
-    } else {
-      showMessage("Failed to get data!");
-      if (Platform.isAndroid) {
-        SystemNavigator.pop();
-      } else if (Platform.isIOS) {
-        exit(0);
-      }
-    }
-  }
+  //       for (var element in allCategories.keys) {
+  //         categorizedProducts[element] = [];
+  //         for (var product in products) {
+  //           if (product.category == element) {
+  //             categorizedProducts[element]?.add(product);
+  //           }
+  //         }
+  //       }
+  //       notifyListeners();
+  //       await getMyProducts(
+  //           showMessage: showMessage,
+  //           profileProvider: profileProvider,
+  //           isFromNavHost: isFromNavHost);
+  //     } on Exception catch (e) {
+  //       showMessage("Error fetching all products: $e");
+  //       profileProvider.hideLoader();
+  //       notifyListeners();
+  //     }
+  //   } else if (response.statusCode == 400) {
+  //     showMessage("Undefined parameter when calling API");
+  //     if (Platform.isAndroid) {
+  //       SystemNavigator.pop();
+  //     } else if (Platform.isIOS) {
+  //       exit(0);
+  //     }
+  //   } else if (response.statusCode == 404) {
+  //     showMessage("API not found");
+  //     if (Platform.isAndroid) {
+  //       SystemNavigator.pop();
+  //     } else if (Platform.isIOS) {
+  //       exit(0);
+  //     }
+  //   } else {
+  //     showMessage("Failed to get data!");
+  //     if (Platform.isAndroid) {
+  //       SystemNavigator.pop();
+  //     } else if (Platform.isIOS) {
+  //       exit(0);
+  //     }
+  //   }
+  // }
 
   getOrders(
       {required Function(String) showMessage,
@@ -1249,8 +1313,8 @@ class ProductProvider extends ChangeNotifier {
         if (jsonDecode(cartData.body)["status"]) {
           await getCart(
               showMessage: showMessage, profileProvider: profileProvider);
-          await getAllProducts(
-              showMessage: showMessage, profileProvider: profileProvider);
+          //TODO await getAllProducts(
+          //   showMessage: showMessage, profileProvider: profileProvider);
         } else {
           snackbar(context, jsonDecode(cartData.body)["message"]);
         }
@@ -1438,9 +1502,10 @@ class ProductProvider extends ChangeNotifier {
 
                             if (cartData.statusCode == 200) {
                               if (jsonDecode(cartData.body)["status"]) {
-                                await getAllProducts(
-                                    showMessage: showMessage,
-                                    profileProvider: profileProvider);
+                                //TODO get all products
+                                // await getAllProducts(
+                                //     showMessage: showMessage,
+                                //     profileProvider: profileProvider);
                                 await getCart(
                                     showMessage: showMessage,
                                     profileProvider: profileProvider);
@@ -1527,8 +1592,8 @@ class ProductProvider extends ChangeNotifier {
         if (jsonDecode(cartData.body)["status"]) {
           await getCart(
               showMessage: showMessage, profileProvider: profileProvider);
-          await getAllProducts(
-              showMessage: showMessage, profileProvider: profileProvider);
+          //TODO await getAllProducts(
+          //showMessage: showMessage, profileProvider: profileProvider);
         }
         profileProvider.isDataFetched = true;
         notifyListeners();
@@ -1552,15 +1617,19 @@ class ProductProvider extends ChangeNotifier {
   Future<void> getData(
       {required Function(String) showMessage,
       required ProfileProvider profileProvider}) async {
-    await getCategories(
-        showMessage: showMessage,
-        profileProvider: profileProvider,
-        isFromNavHost: true);
-    await getSubCategories(
-        showMessage: showMessage,
-        profileProvider: profileProvider,
-        isFromNavHost: true);
-    await getAllProducts(
+    // await getCategories(
+    //     showMessage: showMessage,
+    //     profileProvider: profileProvider,
+    //     isFromNavHost: true);
+    // await getSubCategories(
+    //     showMessage: showMessage,
+    //     profileProvider: profileProvider,
+    //     isFromNavHost: true);
+    // await getAllProducts(
+    //     showMessage: showMessage,
+    //     profileProvider: profileProvider,
+    //     isFromNavHost: true);
+    await getAllCategories(
         showMessage: showMessage,
         profileProvider: profileProvider,
         isFromNavHost: true);
