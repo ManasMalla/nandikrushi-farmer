@@ -13,6 +13,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:mvc_pattern/mvc_pattern.dart';
 import 'package:nandikrushi_farmer/nav_items/profile_provider.dart';
 import 'package:nandikrushi_farmer/onboarding/login/login_provider.dart';
+import 'package:nandikrushi_farmer/product/nk_category.dart';
 import 'package:nandikrushi_farmer/product/product_provider.dart';
 import 'package:nandikrushi_farmer/reusable_widgets/snackbar.dart';
 import 'package:nandikrushi_farmer/reusable_widgets/success_screen.dart';
@@ -29,9 +30,9 @@ class ProductController extends ControllerMVC {
     'description': TextEditingController()
   };
 
-  String? selectedCategory;
-  String? selectedUnits;
-  String? selectedSubCategory;
+  NkCategory? selectedCategory;
+  NkUnit? selectedUnits;
+  NkSubCategory? selectedSubCategory;
 
   addProduct(
       String categoryAPI,
@@ -47,23 +48,20 @@ class ProductController extends ControllerMVC {
     LoginProvider loginProvider = Provider.of(context, listen: false);
     var data = {
       "name": formControllers['product-name']?.text,
-      "category": categoryAPI,
-      "subcategory": subCategoryAPI,
-      "unit": unitsAPI,
+      "category": selectedCategory?.categoryId.toString(),
+      "subcategory": selectedSubCategory?.subcategoryId.toString(),
+      "unit": selectedUnits?.id.toString(),
       "quantity": formControllers['quantity']?.text,
       "price": formControllers['price']?.text,
       "description": formControllers['description']?.text
     };
     var isValidData = true;
     for (MapEntry<String, String?> dataValue in data.entries) {
-      if ((dataValue.value != null && dataValue.value!.isNotEmpty) ||
-          ((productProvider
-                      .subcategories[
-                          productProvider.categories[selectedCategory]]
-                      ?.isEmpty ??
-                  true) &&
-              dataValue.key == "subcategory")) {
-      } else {
+      if (!(dataValue.value != null &&
+          dataValue.value!.isNotEmpty &&
+          selectedCategory != null &&
+          selectedSubCategory != null &&
+          selectedUnits != null)) {
         isValidData = false;
         snackbar(context, "Please enter a valid ${dataValue.key}");
       }
@@ -73,7 +71,6 @@ class ProductController extends ControllerMVC {
       return false;
     }
     var name = formControllers['product-name']?.text ?? "";
-    var category = categoryAPI ?? "";
 
     var quantity = formControllers['quantity']?.text ?? "";
     var price = formControllers['price']?.text ?? "";
@@ -99,26 +96,10 @@ class ProductController extends ControllerMVC {
       "quantity": (int.tryParse(quantity) ?? 0).toString(),
       "price": (double.tryParse(price) ?? 0.0).toString(),
       "description": description.toString(),
-      "units": 1.toString(),
+      "units": selectedUnits!.id.toString(),
       //"category_id": product.category.toString(),
-      "category_id": (productProvider.allCategories[category] ??
-              productProvider.storeCategories[category])
-          .toString(),
-      "sub_category_id": (productProvider
-                      .subcategories[productProvider.allCategories[categoryAPI]]
-                      ?.where((element) =>
-                          element.keys.first.toLowerCase() ==
-                          subCategoryAPI.toString().toLowerCase()) ??
-                  productProvider
-                      .subcategories[productProvider.storeCategories[category]]
-                      ?.where((element) =>
-                          element.keys.first.toLowerCase() ==
-                          subCategoryAPI.toLowerCase()))
-              ?.first
-              .values
-              .first
-              .toString() ??
-          "",
+      "category_id": selectedCategory!.categoryId.toString(),
+      "sub_category_id": selectedSubCategory!.subcategoryId.toString(),
       "seller_id": profileProvider.sellerID,
     };
     if (!loginProvider.isFarmer) {

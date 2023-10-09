@@ -285,7 +285,6 @@ class ProductProvider extends ChangeNotifier {
       try {
         final result = json.decode(response.body);
         if (result["status"]) {
-          //TODO handle success
           profileProvider.hideLoader();
           final rawCategories = groupBy(result["message"] as List<dynamic>,
               (dynamic obj) => obj["category_id"]);
@@ -600,103 +599,88 @@ class ProductProvider extends ChangeNotifier {
     profileProvider.hideLoader();
   }
 
-  // getAllProducts(
-  //     {required Function(String) showMessage,
-  //     required ProfileProvider profileProvider,
-  //     bool isFromNavHost = false}) async {
-  //   profileProvider.fetchingDataType = "fetch our products";
-  //   notifyListeners();
-  //   profileProvider.showLoader();
-  //   var url =
-  //       // profileProvider.customerGroupId == "3"
-  //       // ? "https://nkweb.sweken.com/index.php?route=extension/account/purpletree_multivendor/api/getallapprovedfarmerproducts":
-  //       "https://nkweb.sweken.com/index.php?route=extension/account/purpletree_multivendor/api/getallproducts";
-  //   var response = await Server().getMethodParams(url);
-  //   if (response == null) {
-  //     showMessage("Failed to get a response from the server!");
-  //     //hideLoader();
-  //     if (Platform.isAndroid) {
-  //       SystemNavigator.pop();
-  //     } else if (Platform.isIOS) {
-  //       exit(0);
-  //     }
-  //     return;
-  //   }
-  //   if (response.statusCode == 200) {
-  //     try {
-  //       List<dynamic> decodedResponse =
-  //           (jsonDecode(response.body)["Products"] as List<dynamic>)
-  //               .where(
-  //                 (element) =>
-  //                     element["Product"]["verify_seller"] == "1" &&
-  //                     (profileProvider.customerGroupId == "3"
-  //                         ? element["vendor_details"][0]["type"] == "2"
-  //                         : profileProvider.customerGroupId == "4"
-  //                             ? (element["vendor_details"][0]["type"] == "2" ||
-  //                                 element["vendor_details"][0]["type"] == "3")
-  //                             : true),
-  //               )
-  //               .toList();
-  //       products = [];
+  getAllProducts(
+      {required Function(String) showMessage,
+      required ProfileProvider profileProvider,
+      bool isFromNavHost = false}) async {
+    profileProvider.fetchingDataType = "fetch our products";
+    notifyListeners();
+    profileProvider.showLoader();
+    var url =
+        // profileProvider.customerGroupId == "3"
+        // ? "https://nkweb.sweken.com/index.php?route=extension/account/purpletree_multivendor/api/getallapprovedfarmerproducts":
+        "https://nkweb.sweken.com/index.php?route=extension/account/purpletree_multivendor/api/getallproducts";
+    var response = await Server().getMethodParams(url);
+    if (response == null) {
+      showMessage("Failed to get a response from the server!");
+      //hideLoader();
+      if (Platform.isAndroid) {
+        SystemNavigator.pop();
+      } else if (Platform.isIOS) {
+        exit(0);
+      }
+      return;
+    }
+    if (response.statusCode == 200) {
+      try {
+        List<dynamic> decodedResponse =
+            (jsonDecode(response.body)["Products"] as List<dynamic>)
+                .where(
+                  (element) =>
+                      element["Product"]["verify_seller"] == "1" &&
+                      (profileProvider.customerGroupId == "3"
+                          ? element["vendor_details"][0]["type"] == "2"
+                          : profileProvider.customerGroupId == "4"
+                              ? (element["vendor_details"][0]["type"] == "2" ||
+                                  element["vendor_details"][0]["type"] == "3")
+                              : true),
+                )
+                .toList();
+        products = [];
 
-  //       for (var e in decodedResponse) {
-  //         if (allCategories.entries
-  //             .where((element) =>
-  //                 element.value ==
-  //                 int.tryParse(e["category"][0]["category_id"] ?? "-1"))
-  //             .isNotEmpty) {
-  //           var product = ProductModel.fromJson(e, allCategories).toEntity();
+        for (var e in decodedResponse) {
+          var product = ProductModel.fromJson(e).toEntity();
+          //TODO Replace sellerID with actual data and certificate and add reviews
+          products.add(product);
+        }
+        products = products.toSet().toList();
 
-  //           // 'customer_ratings': jsonEncode(e["Products"][0]["rating"]),
-  //           //TODO Replace sellerID with actual data and certificate and add reviews
+        categorizedProducts =
+            groupBy<Product, String>(products, (product) => product.category);
 
-  //           log("12Prod->$product ,; $e");
-  //           products.add(product);
-  //         }
-  //       }
-  //       products = products.toSet().toList();
-
-  //       for (var element in allCategories.keys) {
-  //         categorizedProducts[element] = [];
-  //         for (var product in products) {
-  //           if (product.category == element) {
-  //             categorizedProducts[element]?.add(product);
-  //           }
-  //         }
-  //       }
-  //       notifyListeners();
-  //       await getMyProducts(
-  //           showMessage: showMessage,
-  //           profileProvider: profileProvider,
-  //           isFromNavHost: isFromNavHost);
-  //     } on Exception catch (e) {
-  //       showMessage("Error fetching all products: $e");
-  //       profileProvider.hideLoader();
-  //       notifyListeners();
-  //     }
-  //   } else if (response.statusCode == 400) {
-  //     showMessage("Undefined parameter when calling API");
-  //     if (Platform.isAndroid) {
-  //       SystemNavigator.pop();
-  //     } else if (Platform.isIOS) {
-  //       exit(0);
-  //     }
-  //   } else if (response.statusCode == 404) {
-  //     showMessage("API not found");
-  //     if (Platform.isAndroid) {
-  //       SystemNavigator.pop();
-  //     } else if (Platform.isIOS) {
-  //       exit(0);
-  //     }
-  //   } else {
-  //     showMessage("Failed to get data!");
-  //     if (Platform.isAndroid) {
-  //       SystemNavigator.pop();
-  //     } else if (Platform.isIOS) {
-  //       exit(0);
-  //     }
-  //   }
-  // }
+        notifyListeners();
+        await getMyProducts(
+            showMessage: showMessage,
+            profileProvider: profileProvider,
+            isFromNavHost: isFromNavHost);
+      } on Exception catch (e) {
+        showMessage("Error fetching all products: $e");
+        profileProvider.hideLoader();
+        notifyListeners();
+      }
+    } else if (response.statusCode == 400) {
+      showMessage("Undefined parameter when calling API");
+      if (Platform.isAndroid) {
+        SystemNavigator.pop();
+      } else if (Platform.isIOS) {
+        exit(0);
+      }
+    } else if (response.statusCode == 404) {
+      showMessage("API not found");
+      if (Platform.isAndroid) {
+        SystemNavigator.pop();
+      } else if (Platform.isIOS) {
+        exit(0);
+      }
+    } else {
+      showMessage("Failed to get data!");
+      if (Platform.isAndroid) {
+        SystemNavigator.pop();
+      } else if (Platform.isIOS) {
+        exit(0);
+      }
+    }
+  }
 
   getOrders(
       {required Function(String) showMessage,
@@ -1313,8 +1297,8 @@ class ProductProvider extends ChangeNotifier {
         if (jsonDecode(cartData.body)["status"]) {
           await getCart(
               showMessage: showMessage, profileProvider: profileProvider);
-          //TODO await getAllProducts(
-          //   showMessage: showMessage, profileProvider: profileProvider);
+          await getAllProducts(
+              showMessage: showMessage, profileProvider: profileProvider);
         } else {
           snackbar(context, jsonDecode(cartData.body)["message"]);
         }
@@ -1502,10 +1486,9 @@ class ProductProvider extends ChangeNotifier {
 
                             if (cartData.statusCode == 200) {
                               if (jsonDecode(cartData.body)["status"]) {
-                                //TODO get all products
-                                // await getAllProducts(
-                                //     showMessage: showMessage,
-                                //     profileProvider: profileProvider);
+                                await getAllProducts(
+                                    showMessage: showMessage,
+                                    profileProvider: profileProvider);
                                 await getCart(
                                     showMessage: showMessage,
                                     profileProvider: profileProvider);
@@ -1592,8 +1575,8 @@ class ProductProvider extends ChangeNotifier {
         if (jsonDecode(cartData.body)["status"]) {
           await getCart(
               showMessage: showMessage, profileProvider: profileProvider);
-          //TODO await getAllProducts(
-          //showMessage: showMessage, profileProvider: profileProvider);
+          await getAllProducts(
+              showMessage: showMessage, profileProvider: profileProvider);
         }
         profileProvider.isDataFetched = true;
         notifyListeners();
@@ -1625,10 +1608,10 @@ class ProductProvider extends ChangeNotifier {
     //     showMessage: showMessage,
     //     profileProvider: profileProvider,
     //     isFromNavHost: true);
-    // await getAllProducts(
-    //     showMessage: showMessage,
-    //     profileProvider: profileProvider,
-    //     isFromNavHost: true);
+    await getAllProducts(
+        showMessage: showMessage,
+        profileProvider: profileProvider,
+        isFromNavHost: true);
     await getAllCategories(
         showMessage: showMessage,
         profileProvider: profileProvider,

@@ -44,23 +44,19 @@ class ProductModel extends Equatable {
   @override
   List<Object?> get props => [productId, seller, canBeSold];
 
-  factory ProductModel.fromJson(Map<String, dynamic> json, Map<String, int> allCategories) => ProductModel(
+  factory ProductModel.fromJson(Map<String, dynamic> json) => ProductModel(
       productId: int.tryParse(json["Product"]["product_id"]) ?? 0,
       name: json["Product"]["product_name"].toString(),
       description: json["Product"]["description"].toString(),
       image: json["Product"]["image"].toString(),
-      price: (((double.tryParse(json["Product"]["final_price"].toString()) ?? 0.0) * 100).roundToDouble() /
+      price: (((double.tryParse(json["Product"]["final_price"].toString()) ?? 0.0) * 100)
+              .roundToDouble() /
           100),
       quantity: int.tryParse(json["Product"]["quantity"]) ?? 0,
       units: '${json["Product"]["min_purchase"]} ${json["Product"]["units"]}',
       canBeSold: json["Product"]["verify_seller"] == "1",
       categoryId: int.tryParse(json["category"][0]["category_id"]) ?? 0,
-      category: allCategories.entries
-          .where((element) =>
-              element.value ==
-              int.tryParse(json["category"][0]["category_id"] ?? "-1"))
-          .first
-          .key,
+      category: json["category"][0]["category_name"],
       subCategoryId: int.tryParse(json["category"][0]["sub_category_id"]) ?? 0,
       subcategory: json["category"][0]["sub_category_name"],
       produceLocation:
