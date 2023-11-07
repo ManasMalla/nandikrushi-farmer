@@ -316,6 +316,7 @@ class MyProductsPage extends StatelessWidget {
                                 log("123");
                               },
                               verify: product["verify_seller"] == "1",
+                              disabled: false,
                               type: CardType.myProducts,
                               productId: product["product_id"] ?? "XYZ",
                               productName: product["product_name"] ?? "Name",

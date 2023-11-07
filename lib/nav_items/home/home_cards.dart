@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:nandikrushi_farmer/nav_items/my_purchases.dart';
+import 'package:nandikrushi_farmer/product/product_provider.dart';
 
 import '../../product/my_products_page.dart';
 import '../../product/orders_page.dart';
@@ -282,7 +283,7 @@ homeMyProductsCard(context, productProvider) {
       : const SizedBox();
 }
 
-homeMyPurchasesCard(context, productProvider) {
+homeMyPurchasesCard(context, ProductProvider productProvider) {
   return productProvider.myPurchases.isNotEmpty
       ? Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -333,12 +334,11 @@ homeMyPurchasesCard(context, productProvider) {
                         //     .myPurchases[itemIndex]["products"].length,
                         itemBuilder: (context, productOrderIndex) {
                           var product = productProvider.myPurchases[itemIndex]
-                              ["products"][productOrderIndex];
+                              .productDetails[productOrderIndex];
                           return Row(
                             children: [
                               Image.network(
-                                product["url"] ??
-                                    "https://img.etimg.com/thumb/msid-64411656,width-640,resizemode-4,imgsize-226493/cow-milk.jpg",
+                                product.image,
                                 height: 48,
                                 width: 48,
                                 fit: BoxFit.cover,
@@ -350,24 +350,22 @@ homeMyPurchasesCard(context, productProvider) {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    product["product_name"] ?? "Name",
+                                    product.name,
                                     style:
                                         Theme.of(context).textTheme.titleMedium,
                                   ),
                                   Text(
-                                    "${product["quantity"]} ${product["units"]?.toString().replaceFirst("1", "") ?? " unit"}${(int.tryParse(product["quantity"]) ?? 1) > 1 ? "s" : ""}",
+                                    "${product.orderQuantity} ${product.units.toString().replaceFirst("1", "")}${((product.orderQuantity)) > 1 ? "s" : ""}",
                                     style:
                                         Theme.of(context).textTheme.bodyMedium,
                                   ),
                                   Opacity(
                                     opacity: 0.4,
                                     child: Text(
-                                      productProvider
-                                                  .myPurchases[itemIndex]
-                                                      ["products"]
-                                                  .length >
+                                      productProvider.myPurchases[itemIndex]
+                                                  .productDetails.length >
                                               1
-                                          ? "${productProvider.myPurchases[itemIndex]["products"].length - 1} More products in this basket"
+                                          ? "${productProvider.myPurchases[itemIndex].productDetails.length - 1} More products in this basket"
                                           : "Only one product in this basket",
                                       style:
                                           Theme.of(context).textTheme.bodySmall,

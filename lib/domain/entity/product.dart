@@ -28,26 +28,28 @@ class Product extends Equatable {
   final Seller seller;
   final double aggregateRating;
   final List<CustomerReview> reviews;
+  final bool disabled;
 
-  Product(
-      {required this.productId,
-      required this.name,
-      required this.description,
-      required this.image,
-      required this.price,
-      required this.quantity,
-      required this.units,
-      required this.canBeSold,
-      required this.category,
-      required this.categoryId,
-      required this.subcategory,
-      required this.subCategoryId,
-      required this.produceLocation,
-      this.produceCoordinates,
-      required this.seller,
-      required this.aggregateRating,
-      required this.reviews})
-      : assert(Uri.tryParse(image)?.host.isNotEmpty ?? false);
+  Product({
+    required this.productId,
+    required this.name,
+    required this.description,
+    required this.image,
+    required this.price,
+    required this.quantity,
+    required this.units,
+    required this.canBeSold,
+    required this.category,
+    required this.categoryId,
+    required this.subcategory,
+    required this.subCategoryId,
+    required this.produceLocation,
+    this.produceCoordinates,
+    required this.seller,
+    required this.aggregateRating,
+    required this.reviews,
+    required this.disabled,
+  }) : assert(Uri.tryParse(image)?.host.isNotEmpty ?? false);
 
   @override
   // TODO: implement props

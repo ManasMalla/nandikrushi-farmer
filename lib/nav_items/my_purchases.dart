@@ -193,40 +193,35 @@ class _MyPurchasesScreenState extends State<MyPurchasesScreen> {
                             );
                           },
                           itemCount: productProvider
-                              .myPurchases[itemIndex]["products"].length,
+                              .myPurchases[itemIndex].productDetails.length,
                           itemBuilder: (context, productOrderIndex) {
                             var product = productProvider.myPurchases[itemIndex]
-                                ["products"][productOrderIndex];
+                                .productDetails[productOrderIndex];
                             return ProductCard(
-                              verify: product["verify_seller"] == "1",
+                              disabled: product.disabled,
+                              verify: true,
                               canTap: false,
                               type: CardType.myPurchases,
-                              productId: product["product_id"] ?? "XYZ",
-                              productName: product["product_name"] ?? "Name",
-                              productDescription:
-                                  product["description"] ?? "Description",
-                              imageURL: product["url"] ??
-                                  "https://img.etimg.com/thumb/msid-64411656,width-640,resizemode-4,imgsize-226493/cow-milk.jpg",
-                              price: double.tryParse(
-                                      product["price"] ?? "00.00") ??
-                                  00.00,
+                              productId: product.productId.toString(),
+                              productName: product.name,
+                              productDescription: product.description,
+                              imageURL: product.image,
+                              price: product.price,
                               units:
-                                  "${product["quantity"]} ${product["units"]?.toString().replaceFirst("1", "") ?? " unit"}${(int.tryParse(product["quantity"]) ?? 1) > 1 ? "s" : ""}",
-                              location: product["place"] ?? "Visakhapatnam",
+                                  "${product.quantity} ${product.units.toString().replaceFirst("1", "")}${product.quantity > 1 ? "s" : ""}",
+                              location: product.produceLocation,
                               poster: productProvider.myPurchases[itemIndex]
-                                  ["store_name"],
+                                  .storeDetails[0].storeName,
                               additionalInformation: {
                                 "date": DateFormat("EEE, MMM dd").format(
                                     DateTime.fromMillisecondsSinceEpoch(
-                                        (int.tryParse(productProvider
-                                                        .myPurchases[itemIndex]
-                                                    ["date"]) ??
-                                                0000000000) *
+                                        (productProvider
+                                                .myPurchases[itemIndex]
+                                                .deliveryDetails[0]
+                                                .deliveryDate) *
                                             1000)),
                                 "status": 0,
-                                "rating": (double.tryParse(
-                                        product["rating"] ?? "0.0") ??
-                                    0),
+                                "rating": product.aggregateRating,
                               },
                             );
                           }),

@@ -19,13 +19,14 @@ class LoaderScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scale = 0.7;
     return Scaffold(
       backgroundColor: Colors.black.withOpacity(0.6),
       body: LayoutBuilder(builder: (context, constraints) {
         return Center(
           child: Consumer<LoginProvider>(builder: (context, loginProvider, _) {
             return CircleAvatar(
-              radius: getProportionateHeight(170, constraints),
+              radius: getProportionateHeight(170 * scale, constraints),
               backgroundColor:
                   createMaterialColor(Theme.of(context).colorScheme.primary)
                       .shade100
@@ -35,13 +36,16 @@ class LoaderScreen extends StatelessWidget {
                 children: [
                   Lottie.asset(
                     "assets/loader.json",
-                    height: getProportionateHeight(170, constraints),
-                    width: getProportionateHeight(300, constraints),
+                    height: getProportionateHeight(170 * scale, constraints),
+                    width: getProportionateHeight(300 * scale, constraints),
                   ),
                   TextWidget(
                     "Please Wait Until We\n${provider is ProfileProvider ? (provider as ProfileProvider).fetchingDataType : "Load Your Data"}..."
                         .toUpperCase(),
-                    size: Theme.of(context).textTheme.titleSmall?.fontSize,
+                    size: (Theme.of(context).textTheme.titleSmall?.fontSize ??
+                            24) *
+                        1.2 *
+                        scale,
                     weight: FontWeight.w500,
                     align: TextAlign.center,
                     color: Theme.of(context).colorScheme.onPrimary,

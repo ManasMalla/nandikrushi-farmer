@@ -262,6 +262,7 @@ class OrdersPage extends StatelessWidget {
                                     ["products"][productOrderIndex];
                                 log(productProvider.orders.toString());
                                 return ProductCard(
+                                  disabled: false,
                                   index: itemIndex,
                                   verify: product?["verify_seller"] ?? "0",
                                   type: CardType.orders,

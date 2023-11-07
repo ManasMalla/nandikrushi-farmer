@@ -9,12 +9,9 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:nandikrushi_farmer/nav_items/profile_provider.dart';
-import 'package:nandikrushi_farmer/product/confirm_order_screen.dart';
 import 'package:nandikrushi_farmer/product/product_page/product_page.dart';
 import 'package:nandikrushi_farmer/product/product_provider.dart';
-import 'package:nandikrushi_farmer/reusable_widgets/elevated_button.dart';
 import 'package:nandikrushi_farmer/reusable_widgets/loader_screen.dart';
-import 'package:nandikrushi_farmer/reusable_widgets/snackbar.dart';
 import 'package:nandikrushi_farmer/reusable_widgets/text_widget.dart';
 import 'package:provider/provider.dart';
 
@@ -30,7 +27,6 @@ class OrderDetailScreen extends StatefulWidget {
 class _OrderDetailScreenState extends State<OrderDetailScreen> {
   @override
   Widget build(BuildContext context) {
-
     return LayoutBuilder(builder: (context, constraints) {
       height(context) {
         return constraints.maxHeight;
@@ -50,7 +46,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Order #${productProvider.myPurchases[widget.index]["order_id"]}'
+                        'Order #${productProvider.myPurchases[widget.index].orderId}'
                             .toUpperCase(),
                         style: Theme.of(context)
                             .textTheme
@@ -59,12 +55,12 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                       ),
                       Text(
                         DateFormat("EEE, MMM dd").format(
-                            DateTime.fromMillisecondsSinceEpoch((int.tryParse(
-                                        productProvider
-                                                .myPurchases[widget.index]
-                                            ["date"]) ??
-                                    0000000000) *
-                                1000)),
+                          DateTime.fromMillisecondsSinceEpoch(
+                            productProvider.myPurchases[widget.index]
+                                    .deliveryDetails[0].deliveryDate *
+                                1000,
+                          ),
+                        ),
                         style: Theme.of(context)
                             .textTheme
                             .titleSmall
@@ -82,7 +78,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 // ],
               ),
               body: RefreshIndicator(
-                onRefresh: ()=>productProvider.getMyPurchases(showMessage: (_){}, profileProvider: profileProvider),
+                onRefresh: () => productProvider.getMyPurchases(
+                    showMessage: (_) {}, profileProvider: profileProvider),
                 child: SingleChildScrollView(
                     child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -90,11 +87,11 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                     Container(
                       width: double.infinity,
                       color: const Color(0xFFEFE8CC),
-                      child: productProvider.myPurchases[widget.index]["products"]
-                                  [0]["order_status_id"] ==
-                              "7"
+                      child: productProvider
+                                  .myPurchases[widget.index].orderStatusId ==
+                              7
                           ? Stepper(
-                            physics: NeverScrollableScrollPhysics(),
+                              physics: NeverScrollableScrollPhysics(),
                               steps: [
                                 Step(
                                     title: const TextWidget(
@@ -106,11 +103,10 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                     subtitle: Text(
                                       DateFormat("EEE, MMM dd").format(
                                           DateTime.fromMillisecondsSinceEpoch(
-                                              (int.tryParse(productProvider
-                                                                  .myPurchases[
-                                                              widget.index]
-                                                          ["date"]) ??
-                                                      0000000000) *
+                                              productProvider
+                                                      .myPurchases[widget.index]
+                                                      .deliveryDetails[0]
+                                                      .deliveryDate *
                                                   1000)),
                                       style: Theme.of(context)
                                           .textTheme
@@ -120,10 +116,14 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                                   255, 192, 183, 147),
                                               letterSpacing: 2.5),
                                     ),
-                                    isActive: (int.tryParse(productProvider.myPurchases[widget.index]["products"]
-                                  [0]["order_status_id"]) ?? 0) > 0,
-                                    state: (int.tryParse(productProvider.myPurchases[widget.index]["products"]
-                                  [0]["order_status_id"]) ?? 0) > 0
+                                    isActive: productProvider
+                                            .myPurchases[widget.index]
+                                            .orderStatusId >
+                                        0,
+                                    state: productProvider
+                                                .myPurchases[widget.index]
+                                                .orderStatusId >
+                                            0
                                         ? StepState.complete
                                         : StepState.indexed),
                                 const Step(
@@ -159,11 +159,10 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                     subtitle: Text(
                                       DateFormat("EEE, MMM dd").format(
                                           DateTime.fromMillisecondsSinceEpoch(
-                                              (int.tryParse(productProvider
-                                                                  .myPurchases[
-                                                              widget.index]
-                                                          ["date"]) ??
-                                                      0000000000) *
+                                              productProvider
+                                                      .myPurchases[widget.index]
+                                                      .deliveryDetails[0]
+                                                      .deliveryDate *
                                                   1000)),
                                       style: Theme.of(context)
                                           .textTheme
@@ -173,10 +172,14 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                                   255, 192, 183, 147),
                                               letterSpacing: 2.5),
                                     ),
-                                    isActive: (int.tryParse(productProvider.myPurchases[widget.index]["products"]
-                                  [0]["order_status_id"]) ?? 0) > 0,
-                                    state: (int.tryParse(productProvider.myPurchases[widget.index]["products"]
-                                  [0]["order_status_id"]) ?? 0) > 0
+                                    isActive: productProvider
+                                            .myPurchases[widget.index]
+                                            .orderStatusId >
+                                        0,
+                                    state: productProvider
+                                                .myPurchases[widget.index]
+                                                .orderStatusId >
+                                            0
                                         ? StepState.complete
                                         : StepState.indexed),
                                 Step(
@@ -185,10 +188,14 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                       weight: FontWeight.bold,
                                     ),
                                     content: const SizedBox(),
-                                    isActive: (int.tryParse(productProvider.myPurchases[widget.index]["products"]
-                                  [0]["order_status_id"]) ?? 0) > 1,
-                                    state: (int.tryParse(productProvider.myPurchases[widget.index]["products"]
-                                  [0]["order_status_id"]) ?? 0) > 1
+                                    isActive: productProvider
+                                            .myPurchases[widget.index]
+                                            .orderStatusId >
+                                        1,
+                                    state: productProvider
+                                                .myPurchases[widget.index]
+                                                .orderStatusId >
+                                            1
                                         ? StepState.complete
                                         : StepState.indexed),
                                 Step(
@@ -197,10 +204,14 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                       weight: FontWeight.bold,
                                     ),
                                     content: const SizedBox(),
-                                    isActive: (int.tryParse(productProvider.myPurchases[widget.index]["products"]
-                                  [0]["order_status_id"]) ?? 0) > 2,
-                                    state: (int.tryParse(productProvider.myPurchases[widget.index]["products"]
-                                  [0]["order_status_id"]) ?? 0) > 2
+                                    isActive: productProvider
+                                            .myPurchases[widget.index]
+                                            .orderStatusId >
+                                        2,
+                                    state: productProvider
+                                                .myPurchases[widget.index]
+                                                .orderStatusId >
+                                            2
                                         ? StepState.complete
                                         : StepState.indexed),
                                 Step(
@@ -209,10 +220,14 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                       weight: FontWeight.bold,
                                     ),
                                     content: const SizedBox(),
-                                    isActive: (int.tryParse(productProvider.myPurchases[widget.index]["products"]
-                                  [0]["order_status_id"]) ?? 0) > 3,
-                                    state: (int.tryParse(productProvider.myPurchases[widget.index]["products"]
-                                  [0]["order_status_id"]) ?? 0) > 3
+                                    isActive: productProvider
+                                            .myPurchases[widget.index]
+                                            .orderStatusId >
+                                        3,
+                                    state: productProvider
+                                                .myPurchases[widget.index]
+                                                .orderStatusId >
+                                            3
                                         ? StepState.complete
                                         : StepState.indexed),
                               ],
@@ -245,28 +260,19 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                 primary: false,
                                 shrinkWrap: true,
                                 itemCount: productProvider
-                                    .myPurchases[widget.index]["products"].length,
+                                    .myPurchases[widget.index]
+                                    .productDetails
+                                    .length,
                                 itemBuilder: (context, index) {
-                                  var item =
-                                      productProvider.myPurchases[widget.index]
-                                          ["products"][index];
+                                  var item = productProvider
+                                      .myPurchases[widget.index]
+                                      .productDetails[index];
                                   return InkWell(
                                     onTap: () {
-                                      if (productProvider.products
-                                          .where((element) =>
-                                              element.productId.toString() ==
-                                              item["product_id"])
-                                          .isNotEmpty) {
-                                        Navigator.of(context).push(
-                                            MaterialPageRoute(
-                                                builder: (context) => ProductPage(
-                                                    product: productProvider
-                                                        .products
-                                                        .firstWhere((element) =>
-                                                            element.productId.toString() ==
-                                                            item[
-                                                                "product_id"]))));
-                                      }
+                                      Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  ProductPage(product: item)));
                                     },
                                     child: Row(
                                       mainAxisAlignment:
@@ -277,18 +283,18 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                               CrossAxisAlignment.start,
                                           children: [
                                             TextWidget(
-                                              '${item['product_name']} x ${item['quantity']}',
+                                              '${item.name} x ${item.orderQuantity}',
                                               weight: FontWeight.w500,
                                               size: height(context) * 0.02,
                                             ),
                                             TextWidget(
-                                              "${item["quantity"]} ${item["units"]?.toString().replaceFirst("1", "") ?? " unit"}${(int.tryParse(item["quantity"]) ?? 1) > 1 ? "s" : ""}",
+                                              "${item.orderQuantity} ${item.units.replaceFirst("1", "")}${item.orderQuantity > 1 ? "s" : ""}",
                                               size: height(context) * 0.017,
                                             ),
                                           ],
                                         ),
                                         TextWidget(
-                                          "Rs. ${((double.tryParse(item['price'] ?? "0") ?? 0) * (double.tryParse(item['quantity'] ?? "0") ?? 0)).toStringAsFixed(2)}",
+                                          "Rs. ${(item.price * item.orderQuantity).toStringAsFixed(2)}",
                                           size: Theme.of(context)
                                               .textTheme
                                               .titleMedium
@@ -317,7 +323,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                         letterSpacing: 2.5),
                               ),
                               TextWidget(
-                                'Rs. ${(productProvider.myPurchases[widget.index]["products"].map((e) => (double.tryParse(e['price'] ?? "0") ?? 0) * (double.tryParse(e['quantity'] ?? "0") ?? 0)).reduce(
+                                'Rs. ${(productProvider.myPurchases[widget.index].productDetails.map((e) => (e.price) * (e.quantity)).reduce(
                                       (value, element) => value + element,
                                     )).toStringAsFixed(2)}',
                                 weight: FontWeight.w700,
@@ -364,7 +370,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                           letterSpacing: 5),
                                 ),
                                 TextWidget(
-                                  'Rs. ${(productProvider.myPurchases[widget.index]["products"].map((e) => (double.tryParse(e['price'] ?? "0") ?? 0) * (double.tryParse(e['quantity'] ?? "0") ?? 0)).reduce(
+                                  'Rs. ${(productProvider.myPurchases[widget.index].productDetails.map((e) => (e.price) * ((e.quantity))).reduce(
                                         (value, element) => value + element,
                                       ) + 100).toStringAsFixed(2)}',
                                   weight: FontWeight.w700,
@@ -405,7 +411,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                             children: [
                               TextWidget(
                                 productProvider.myPurchases[widget.index]
-                                    ["products"][0]["payment_method"],
+                                    .paymentDetails.paymentMethod,
                                 size: height(context) * 0.02,
                               ),
                               TextWidget(
@@ -433,25 +439,25 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                             height: 16,
                           ),
                           Text(
-                            "${productProvider.myPurchases[widget.index]["products"][0]["shipping_firstname"]} ${productProvider.myPurchases[widget.index]["products"][0]["shipping_lastname"]}",
+                            "${productProvider.myPurchases[widget.index].shippingDetails.shippingFirstName} ${productProvider.myPurchases[widget.index].shippingDetails.shippingLastName}",
                             style: Theme.of(context).textTheme.headlineSmall,
                           ),
                           Text(productProvider.myPurchases[widget.index]
-                              ["products"][0]["shipping_house_number"]),
+                              .shippingDetails.houseNo),
                           Text(productProvider.myPurchases[widget.index]
-                              ["products"][0]["shipping_address_1"]),
+                              .shippingDetails.shippingAddress1),
                           Text(productProvider.myPurchases[widget.index]
-                              ["products"][0]["shipping_address_2"]),
+                              .shippingDetails.shippingAddress2),
                           Text(productProvider.myPurchases[widget.index]
-                              ["products"][0]["shipping_city"]),
+                              .shippingDetails.shippingCity),
                           Text(productProvider.myPurchases[widget.index]
-                              ["products"][0]["shipping_zone"]),
+                              .shippingDetails.shippingZone),
                           Text(productProvider.myPurchases[widget.index]
-                              ["products"][0]["shipping_country"]),
+                              .shippingDetails.shippingCountry),
                           Text(
-                              "Pincode: ${productProvider.myPurchases[widget.index]["products"][0]["shipping_postcode"]}"),
+                              "Pincode: ${productProvider.myPurchases[widget.index].shippingDetails.shippingPostcode}"),
                           Text(
-                              "Contact Number: ${productProvider.myPurchases[widget.index]["products"][0]["telephone"]}"),
+                              "Contact Number: ${productProvider.myPurchases[widget.index].customerDetails.telephone}"),
                           const SizedBox(
                             height: 16,
                           ),
@@ -464,8 +470,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                 size: height(context) * 0.02,
                               ),
                               productProvider.myPurchases[widget.index]
-                                          ["products"][0]["order_status_id"] ==
-                                      "7"
+                                          .orderStatusId ==
+                                      7
                                   ? const SizedBox()
                                   : TextButton(
                                       onPressed: () async {
@@ -481,7 +487,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                                 content:
                                                     Consumer<ProductProvider>(
                                                         builder: (context,
-                                                            productProvider, _) {
+                                                            productProvider,
+                                                            _) {
                                                   return Container(
                                                     width: double.infinity,
                                                     padding:
@@ -497,11 +504,11 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                                             "Choose Delivery Slot",
                                                             weight:
                                                                 FontWeight.w900,
-                                                            size:
-                                                                Theme.of(context)
-                                                                    .textTheme
-                                                                    .titleMedium
-                                                                    ?.fontSize,
+                                                            size: Theme.of(
+                                                                    context)
+                                                                .textTheme
+                                                                .titleMedium
+                                                                ?.fontSize,
                                                           ),
                                                           const SizedBox(
                                                             height: 16,
@@ -812,46 +819,52 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                             ],
                           ),
                           TextWidget(
-                            '${DateFormat("EEE, MMM dd yyyy").format(DateTime.fromMillisecondsSinceEpoch((int.tryParse(productProvider.myPurchases[widget.index]["date"]) ?? 0000000000) * 1000))} ${productProvider.myPurchases[widget.index]["products"][0]["delivery_time"]}',
+                            '${DateFormat("EEE, MMM dd yyyy").format(DateTime.fromMillisecondsSinceEpoch((productProvider.myPurchases[widget.index].deliveryDetails[0].deliveryDate) * 1000))} ${productProvider.myPurchases[widget.index].deliveryDetails[0].deliveryTime}',
                             color: Colors.grey,
                             size: height(context) * 0.02,
                           ),
                           const SizedBox(
                             height: 16,
                           ),
-                          productProvider.myPurchases[widget.index]["products"][0]
-                                      ["order_status_id"] ==
-                                  "7"
+                          productProvider.myPurchases[widget.index]
+                                      .orderStatusId ==
+                                  7
                               ? TextWidget(
                                   'This Order is cancelled'.toUpperCase(),
                                   color: Colors.red,
                                   weight: FontWeight.w700,
                                   size: height(context) * 0.02,
                                 )
-                              : (int.tryParse(productProvider.myPurchases[widget.index]["products"]
-                                  [0]["order_status_id"]) ?? 0) > 2 ? SizedBox() : OutlinedButton(
-                                  style: OutlinedButton.styleFrom(
-                                      side: const BorderSide(
-                                          color: Colors.red, width: 2),
-                                      shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(8))),
-                                  onPressed: () {
-                                    log(productProvider.myPurchases[widget.index]
-                                        .toString());
-                                    productProvider.cancelOrder(context,
-                                        profileProvider: profileProvider,
-                                        ordId: productProvider
-                                                .myPurchases[widget.index]
-                                            ["order_id"]);
-                                  },
-                                  child: TextWidget(
-                                    'Cancel Order'.toUpperCase(),
-                                    color: Colors.red,
-                                    weight: FontWeight.w700,
-                                    size: height(context) * 0.02,
-                                  ),
-                                )
+                              : productProvider.myPurchases[widget.index]
+                                          .orderStatusId >
+                                      2
+                                  ? SizedBox()
+                                  : OutlinedButton(
+                                      style: OutlinedButton.styleFrom(
+                                          side: const BorderSide(
+                                              color: Colors.red, width: 2),
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(8))),
+                                      onPressed: () {
+                                        log(productProvider
+                                            .myPurchases[widget.index]
+                                            .toString());
+                                        productProvider.cancelOrder(
+                                          context,
+                                          profileProvider: profileProvider,
+                                          ordId: productProvider
+                                              .myPurchases[widget.index]
+                                              .orderId,
+                                        );
+                                      },
+                                      child: TextWidget(
+                                        'Cancel Order'.toUpperCase(),
+                                        color: Colors.red,
+                                        weight: FontWeight.w700,
+                                        size: height(context) * 0.02,
+                                      ),
+                                    )
                         ],
                       ),
                     )

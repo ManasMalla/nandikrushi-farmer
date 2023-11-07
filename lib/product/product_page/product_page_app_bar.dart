@@ -67,6 +67,7 @@ productPageAppBar(context, ProductProvider productProvider, profileProvider) {
                                           print(productProvider.cart[index]
                                               ["verify_seller"]);
                                           return ProductCard(
+                                            disabled: false,
                                               verify: productProvider.cart[index]
                                                       ["verify_seller"] ==
                                                   "true",

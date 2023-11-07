@@ -14,6 +14,7 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart';
 import 'package:intl/intl.dart';
 import 'package:nandikrushi_farmer/domain/entity/product.dart';
+import 'package:nandikrushi_farmer/domain/entity/purchase.dart';
 import 'package:nandikrushi_farmer/nav_items/profile_provider.dart';
 import 'package:nandikrushi_farmer/product/nk_category.dart';
 import 'package:nandikrushi_farmer/reusable_widgets/elevated_button.dart';
@@ -41,7 +42,7 @@ class ProductProvider extends ChangeNotifier {
   List<Product> products = [];
   List<Map<String, String>> myProducts = [];
   List<Map<String, dynamic>> orders = [];
-  List<Map<String, dynamic>> myPurchases = [];
+  List<Purchase> myPurchases = [];
   List<Map<String, String>> coupons = [];
   Map<String, List<Product>> categorizedProducts = {};
   Map<String, String> appliedCoupon = {};
@@ -624,22 +625,20 @@ class ProductProvider extends ChangeNotifier {
     if (response.statusCode == 200) {
       try {
         List<dynamic> decodedResponse =
-            (jsonDecode(response.body)["Products"] as List<dynamic>)
-                .where(
-                  (element) =>
-                      element["Product"]["verify_seller"] == "1" &&
-                      (profileProvider.customerGroupId == "3"
-                          ? element["vendor_details"][0]["type"] == "2"
-                          : profileProvider.customerGroupId == "4"
-                              ? (element["vendor_details"][0]["type"] == "2" ||
-                                  element["vendor_details"][0]["type"] == "3")
-                              : true),
-                )
-                .toList();
+            (jsonDecode(response.body)["Products"] as List<dynamic>).toList();
         products = [];
 
         for (var e in decodedResponse) {
-          var product = ProductModel.fromJson(e).toEntity();
+          var product = ProductModel.fromJson(
+            e,
+            e["Product"]["verify_seller"] == "1" &&
+                (profileProvider.customerGroupId == "3"
+                    ? e["vendor_details"][0]["type"] == "2"
+                    : profileProvider.customerGroupId == "4"
+                        ? (e["vendor_details"][0]["type"] == "2" ||
+                            e["vendor_details"][0]["type"] == "3")
+                        : true),
+          ).toEntity();
           //TODO Replace sellerID with actual data and certificate and add reviews
           products.add(product);
         }
@@ -851,110 +850,103 @@ class ProductProvider extends ChangeNotifier {
         if (jsonDecode(myPurchasesData.body)["status"]) {
           List<dynamic> myPurchasesJSONResponse =
               jsonDecode(myPurchasesData.body)["order"];
-          for (var element in myPurchasesJSONResponse) {
-            var myPurchasesData = {"order_id": element["order_id"]};
-            myPurchasesData["products"] = [];
-            for (var productOrderDetails
-                in (element["product_details"] as List<dynamic>)) {
-              // print(
-              //     "The rating of the product you've purchased: ${}");
-              // if (products
-              //     .where((e) =>
-              //         e.productId == productOrderDetails["product_id"])
-              //     .isNotEmpty) {
-              (myPurchasesData["products"]).add({
-                "product_name": productOrderDetails["product_name"],
-                "order_status_id": element["order_status_id"],
-                "order_status": element["order_status"],
-                "delivery_time": element["delivery_details"][0]
-                    ["delivery_time"],
-                "description": products
-                        .where((e) =>
-                            e.productId == productOrderDetails["product_id"])
-                        .isNotEmpty
-                    ? products
-                        .where((e) =>
-                            e.productId == productOrderDetails["product_id"])
-                        .first
-                        .description
-                    : (productOrderDetails["description"] ??
-                        "Nandikrushi products are organic and fresh"),
-                "url": products
-                            .where((e) =>
-                                e.productId.toString() ==
-                                productOrderDetails["product_id"])
-                            .isNotEmpty &&
-                        (Uri.tryParse(products
-                                    .where((e) =>
-                                        e.productId.toString() ==
-                                        productOrderDetails["product_id"])
-                                    .first
-                                    .image)
-                                ?.host
-                                .isNotEmpty ??
-                            false)
-                    ? products
-                        .where((e) =>
-                            e.productId.toString() ==
-                            productOrderDetails["product_id"])
-                        .first
-                        .image
-                    : "http://images.jdmagicbox.com/comp/visakhapatnam/q2/0891px891.x891.180329082226.k1q2/catalogue/nandi-krushi-visakhapatnam-e-commerce-service-providers-aomg9cai5i-250.jpg",
-                "price": productOrderDetails["price"],
-                "product_id": productOrderDetails["product_id"],
-                "quantity": productOrderDetails["quantity"],
-                "units": products
-                        .where((e) =>
-                            e.productId == productOrderDetails["product_id"])
-                        .isNotEmpty
-                    ? products
-                        .where((e) =>
-                            e.productId == productOrderDetails["product_id"])
-                        .first
-                        .units
-                    : "units",
-                "payment_method": element["payment_details"][0]
-                    ["payment_method"],
-                "place": element["shipping_details"][0]["shipping_city"],
-                "shipping_firstname": element["shipping_details"][0]
-                    ["shipping_firstname"],
-                "shipping_lastname": element["shipping_details"][0]
-                    ["shipping_lastname"],
-                "shipping_address_1": element["shipping_details"][0]
-                    ["shipping_address_1"],
-                "shipping_house_number": element["shipping_details"][0]
-                    ["house_no"],
-                "shipping_address_2": element["shipping_details"][0]
-                    ["shipping_address_2"],
-                "shipping_city": element["shipping_details"][0]
-                    ["shipping_city"],
-                "shipping_postcode": element["shipping_details"][0]
-                    ["shipping_postcode"],
-                "shipping_country": element["shipping_details"][0]
-                    ["shipping_country"],
-                "shipping_zone": element["shipping_details"][0]
-                    ["shipping_zone"],
-                "telephone": element["customer_details"][0]["telephone"],
-                "rating": products
-                        .where((e) =>
-                            e.productId == productOrderDetails["product_id"])
-                        .isNotEmpty
-                    ? products
-                        .where((e) =>
-                            e.productId == productOrderDetails["product_id"])
-                        .first
-                        .aggregateRating
-                    : "3.5"
-              });
-              // }
-            }
-            myPurchasesData.addAll({
-              "store_name": "${element["store_details"][0]["store_name"]}",
-              "date": element["delivery_details"][0]["delivery_date"],
-            });
+          myPurchases = myPurchasesJSONResponse
+              .map(
+                (element) => Purchase(
+                  orderId: int.parse(
+                    element["order_id"],
+                  ),
+                  orderStatusId: int.parse(
+                    element["order_status_id"],
+                  ),
+                  orderStatus: element["order_status"],
+                  productDetails: (element["product_details"] as List<dynamic>)
+                      .map((productOrderDetails) {
+                    return ProductOrder.fromProduct(
+                      products
+                          .where((e) =>
+                              e.productId ==
+                              int.parse(productOrderDetails["product_id"]))
+                          .first,
+                      int.parse(
+                        productOrderDetails["quantity"],
+                      ),
+                      int.parse(
+                          element["delivery_details"][0]["delivery_date"]),
+                    );
+                  }).toList(),
+                  storeDetails: (element["store_details"] as List<dynamic>)
+                      .map((storeDetail) => OrderStoreDetails(
+                            storeId: int.parse(storeDetail["store_id"]),
+                            storeName: storeDetail["store_name"],
+                          ))
+                      .toList(),
+                  customerDetails: OrderCustomerDetails(
+                    customerId: int.parse(
+                        element["customer_details"][0]["customer_id"]),
+                    firstName: element["customer_details"][0]["firstname"],
+                    lastName: element["customer_details"][0]["lastname"],
+                    email: element["customer_details"][0]["email"],
+                    telephone: element["customer_details"][0]["telephone"],
+                  ),
+                  paymentDetails: OrderPaymentDetails(
+                    paymentFirstName: element["payment_details"][0]
+                        ["payment_firstname"],
+                    paymentLastName: element["payment_details"][0]
+                        ["payment_lastname"],
+                    paymentAddress1: element["payment_details"][0]
+                        ["payment_address_1"],
+                    paymentAddress2: element["payment_details"][0]
+                        ["payment_address_2"],
+                    paymentCity: element["payment_details"][0]["payment_city"],
+                    paymentPostcode: element["payment_details"][0]
+                        ["payment_postcode"],
+                    paymentCountry: element["payment_details"][0]
+                        ["payment_country"],
+                    paymentZone: element["payment_details"][0]["payment_zone"],
+                    paymentMethod: element["payment_details"][0]
+                        ["payment_method"],
+                  ),
+                  shippingDetails: OrderShippingDetails(
+                    shippingFirstName: element["shipping_details"][0]
+                        ["shipping_firstname"],
+                    shippingLastName: element["shipping_details"][0]
+                        ["shipping_lastname"],
+                    shippingAddress1: element["shipping_details"][0]
+                        ["shipping_address_1"],
+                    shippingAddress2: element["shipping_details"][0]
+                        ["shipping_address_2"],
+                    shippingCity: element["shipping_details"][0]
+                        ["shipping_city"],
+                    shippingPostcode: element["shipping_details"][0]
+                        ["shipping_postcode"],
+                    shippingCountry: element["shipping_details"][0]
+                        ["shipping_country"],
+                    shippingZone: element["shipping_details"][0]
+                        ["shipping_zone"],
+                    houseNo: element["shipping_details"][0]["house_no"],
+                  ),
+                  couponStatus: element["coupon_status"][0]["coupon_status"],
+                  deliveryDetails:
+                      (element["delivery_details"] as List<dynamic>)
+                          .map(
+                            (deliveryDetail) => OrderDeliveryDetails(
+                              deliveryDate:
+                                  int.parse(deliveryDetail["delivery_date"]),
+                              deliveryTime: deliveryDetail["delivery_time"],
+                              orderStatus: int.parse(
+                                deliveryDetail["order_status"],
+                              ),
+                            ),
+                          )
+                          .toList(),
+                  totalOrderPrice: double.parse(
+                    element["total_order_price"][0]["order_total"],
+                  ),
+                ),
+              )
+              .toList();
 
-            myPurchases.add(myPurchasesData);
-          }
           log(myPurchases.toString());
           if (!isFromNavHost) {
             profileProvider.isDataFetched = true;

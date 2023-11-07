@@ -167,28 +167,30 @@ class _SearchScreenState extends State<SearchScreen>
                         (index) => Tab(
                           child: TextWidget(
                             productProvider.categorizedProducts.entries
-                                        .where((element) => searchController
-                                                .text.isNotEmpty
-                                            ? element.value
-                                                .where((element1) =>
-                                                    element1.name.toLowerCase()
-                                                        .contains(searchController
-                                                            .text
-                                                            .toLowerCase()) ??
-                                                    true)
-                                                .isNotEmpty
-                                            : element.value.isNotEmpty)
+                                        .where((element) =>
+                                            searchController.text.isNotEmpty
+                                                ? element.value
+                                                    .where((element1) =>
+                                                        element1.name
+                                                            .toLowerCase()
+                                                            .contains(searchController.text
+                                                                .toLowerCase()) ??
+                                                        true)
+                                                    .isNotEmpty
+                                                : element.value.isNotEmpty)
                                         .toList()
                                         .length >
                                     index
                                 ? productProvider.categorizedProducts.entries
-                                    .where((element) =>
-                                        searchController.text.isNotEmpty
-                                            ? element.value
-                                                .where((element1) =>
-                                                    element1.name.toLowerCase().contains(searchController.text.toLowerCase()) ?? true)
-                                                .isNotEmpty
-                                            : element.value.isNotEmpty)
+                                    .where((element) => searchController.text.isNotEmpty
+                                        ? element.value
+                                            .where((element1) =>
+                                                element1.name
+                                                    .toLowerCase()
+                                                    .contains(searchController.text.toLowerCase()) ??
+                                                true)
+                                            .isNotEmpty
+                                        : element.value.isNotEmpty)
                                     .toList()[index]
                                     .key
                                     .toUpperCase()
@@ -216,14 +218,12 @@ class _SearchScreenState extends State<SearchScreen>
                           child: TextWidget(
                             _controller.index >=
                                     productProvider.categorizedProducts.entries
-                                        .where((element) => searchController
-                                                .text.isNotEmpty
+                                        .where((element) => searchController.text.isNotEmpty
                                             ? element.value
                                                 .where((element1) =>
                                                     element1.name
                                                         ?.toLowerCase()
-                                                        .contains(searchController
-                                                            .text
+                                                        .contains(searchController.text
                                                             .toLowerCase()) ??
                                                     true)
                                                 .isNotEmpty
@@ -235,7 +235,10 @@ class _SearchScreenState extends State<SearchScreen>
                                     .where((element) => searchController.text.isNotEmpty
                                         ? element.value
                                             .where((element1) =>
-                                                element1.name?.toLowerCase().contains(searchController.text.toLowerCase()) ?? true)
+                                                element1.name
+                                                    ?.toLowerCase()
+                                                    .contains(searchController.text.toLowerCase()) ??
+                                                true)
                                             .isNotEmpty
                                         : element.value.isNotEmpty)
                                     .toList()[_controller.index]
@@ -299,40 +302,43 @@ class _SearchScreenState extends State<SearchScreen>
                                             alignment: Alignment.center,
                                             children: [
                                               Opacity(
-                                                opacity:
-                                                    product?.quantity == 0
-                                                        ? 0.2
-                                                        : 1.0,
+                                                opacity: product?.quantity == 0
+                                                    ? 0.2
+                                                    : 1.0,
                                                 child: ProductCard(
-                                                    sellerMail: product?.seller.email,
-                                                    sellerMobile: product?.seller.phoneNumber,
+                                                    disabled: !(product?.disabled ??
+                                                        false),
+                                                    sellerMail:
+                                                        product?.seller.email,
+                                                    sellerMobile: product
+                                                        ?.seller.phoneNumber,
                                                     type: CardType.product,
-                                                    verify: product?.canBeSold ?? false,
-                                                    productId:
-                                                        product?.productId.toString()?? "XYZ",
+                                                    verify: product?.canBeSold ??
+                                                        false,
+                                                    productId: product
+                                                            ?.productId
+                                                            .toString() ??
+                                                        "XYZ",
                                                     productName:
-                                                        product?.name ??
-                                                            "Name",
+                                                        product?.name ?? "Name",
                                                     productDescription:
                                                         product?.description ??
                                                             "Description",
                                                     imageURL: product?.image ??
                                                         "https://img.etimg.com/thumb/msid-64411656,width-640,resizemode-4,imgsize-226493/cow-milk.jpg",
-                                                    price: double.tryParse(
-                                                            product?.price.toString() ??
-                                                                "00.00") ??
-                                                        00.00,
+                                                    price:
+                                                        double.tryParse(product?.price.toString() ?? "00.00") ??
+                                                            00.00,
                                                     units: product?.units ??
                                                         "1 unit",
-                                                    location:
-                                                        product?.produceLocation ??
-                                                            "Visakhapatnam"),
+                                                    location: product
+                                                            ?.produceLocation ??
+                                                        "Visakhapatnam"),
                                               ),
                                               Positioned(
                                                   // bottom: 50,
                                                   // right: 60,
-                                                  child: product?.quantity ==
-                                                          0
+                                                  child: product?.quantity == 0
                                                       ? Text(
                                                           "This product is temporarily unavailable",
                                                           style:
@@ -455,7 +461,8 @@ class _MapsContainerState extends State<MapsContainer>
         .where((e) => e.produceCoordinates != null)
         .map((e) => Marker(
               markerId: MarkerId(e.seller.name.toString()),
-              position: LatLng(e.produceCoordinates!.longitude, e.produceCoordinates!.latitude),
+              position: LatLng(e.produceCoordinates!.longitude,
+                  e.produceCoordinates!.latitude),
               infoWindow: InfoWindow(
                 title: e.seller.name.toString(),
                 snippet: "Fresh Veggies from here",

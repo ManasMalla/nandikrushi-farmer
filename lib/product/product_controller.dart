@@ -11,6 +11,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mvc_pattern/mvc_pattern.dart';
+import 'package:nandikrushi_farmer/domain/entity/purchase.dart';
 import 'package:nandikrushi_farmer/nav_items/profile_provider.dart';
 import 'package:nandikrushi_farmer/onboarding/login/login_provider.dart';
 import 'package:nandikrushi_farmer/product/nk_category.dart';
@@ -41,7 +42,7 @@ class ProductController extends ControllerMVC {
       BuildContext context,
       List<String> image,
       List<String> unitsList,
-      Map<dynamic, bool> ingredients,
+      List<ProductOrder> ingredients,
       Function(String) showMessage,
       ProductProvider productProvider,
       ProfileProvider profileProvider) async {
@@ -103,10 +104,10 @@ class ProductController extends ControllerMVC {
       "seller_id": profileProvider.sellerID,
     };
     if (!loginProvider.isFarmer) {
-      var igDataAPI =
-          ingredients.entries.where((element) => element.value).map((entry) {
+      var igDataAPI = ingredients.map((entry) {
         // body.addAll({
-        return {"product_id": entry.key, quantity: 1}.toString();
+        return {"product_id": entry.productId.toString(), quantity: 1}
+            .toString();
         // });
       }).toList();
       igDataAPI.asMap().forEach((key, value) {

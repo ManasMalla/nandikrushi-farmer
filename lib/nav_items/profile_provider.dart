@@ -221,7 +221,7 @@ class ProfileProvider extends ChangeNotifier {
       var userAddressResponse = await Server().postFormData(body: {
         "customer_id": sellerID.toString()
       }, url: "https://nkweb.sweken.com/index.php?route=extension/account/purpletree_multivendor/api/address/getallAddress");
-
+      print("userAddressResponse: $sellerID");
       fetchingDataType = "fetch your addresses";
       notifyListeners();
       if (userAddressResponse == null) {

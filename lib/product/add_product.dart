@@ -9,6 +9,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:nandikrushi_farmer/domain/entity/purchase.dart';
 import 'package:nandikrushi_farmer/nav_host.dart';
 import 'package:nandikrushi_farmer/nav_items/profile_provider.dart';
 import 'package:nandikrushi_farmer/onboarding/login/login_provider.dart';
@@ -37,12 +38,13 @@ class AddProductScreen extends StatefulWidget {
 
 class _AddProductScreenState extends State<AddProductScreen> {
   ProductController addProductController = ProductController();
-  Map<String, bool> selectedIngredients = {};
+  List<ProductOrder> selectedIngredients = [];
   @override
   Widget build(BuildContext context) {
-    return Consumer<LoginProvider>(builder: (context, loginProvider, __) {
+    return Consumer<ProfileProvider>(builder: (context, profileProvider, __) {
       return Consumer<ProductProvider>(builder: (context, productProvider, _) {
         return LayoutBuilder(builder: (context, constraints) {
+          var isStore = profileProvider.customerGroupId == "3";
           return Scaffold(
             resizeToAvoidBottomInset: true,
             body: Consumer<ProfileProvider>(
@@ -586,44 +588,52 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                                                 .textTheme
                                                                 .bodyMedium,
                                                           ),
-                                                          dropdownColor: ElevationOverlay
-                                                              .colorWithOverlay(
-                                                                  Theme.of(
-                                                                          context)
+                                                          dropdownColor:
+                                                              ElevationOverlay.colorWithOverlay(
+                                                                  Theme.of(context)
                                                                       .colorScheme
                                                                       .surface,
-                                                                  Theme.of(
-                                                                          context)
+                                                                  Theme.of(context)
                                                                       .colorScheme
                                                                       .primary,
                                                                   2.0),
                                                           value: addProductController
                                                               .selectedCategory,
-                                                          items: productProvider
-                                                              .categories
-                                                              .map((category) =>
-                                                                  DropdownMenuItem(
-                                                                    value:
-                                                                        category,
-                                                                    child: Text(
-                                                                      capitalize(
-                                                                        category
-                                                                            .categoryName
-                                                                            .toLowerCase(),
-                                                                      ),
-                                                                      style: Theme.of(
-                                                                              context)
-                                                                          .textTheme
-                                                                          .bodyMedium,
-                                                                    ),
-                                                                  ))
-                                                              .toList(),
-                                                          onChanged: (_) {
-                                                            setState(() {
-                                                              addProductController
-                                                                  .selectedCategory = _;
-                                                            });
-                                                          }),
+                                                          items: isStore &&
+                                                                  selectedIngredients
+                                                                      .isEmpty
+                                                              ? null
+                                                              : productProvider
+                                                                  .categories
+                                                                  .where((element) =>
+                                                                      isStore && selectedIngredients.length > 1
+                                                                          ? (element.customerGroupId ==
+                                                                              3)
+                                                                          : true)
+                                                                  .map((category) =>
+                                                                      DropdownMenuItem(
+                                                                        value:
+                                                                            category,
+                                                                        child:
+                                                                            Text(
+                                                                          capitalize(
+                                                                            category.categoryName.toLowerCase(),
+                                                                          ),
+                                                                          style: Theme.of(context)
+                                                                              .textTheme
+                                                                              .bodyMedium,
+                                                                        ),
+                                                                      ))
+                                                                  .toList(),
+                                                          onChanged: isStore &&
+                                                                  selectedIngredients.length == 1
+                                                              ? null
+                                                              : (_) {
+                                                                  setState(() {
+                                                                    addProductController
+                                                                        .selectedCategory = _;
+                                                                  });
+                                                                }),
                                                     ),
                                                     const SizedBox(
                                                       width: 20,
@@ -666,139 +676,173 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                                                   2.0),
                                                           value: addProductController
                                                               .selectedSubCategory,
-                                                          items: addProductController
-                                                              .selectedCategory
-                                                              ?.subCategories
-                                                              .map((e) =>
-                                                                  DropdownMenuItem(
-                                                                    value: e,
-                                                                    child: Text(
-                                                                      capitalize(
-                                                                        e.subcategoryName
-                                                                            .toLowerCase(),
-                                                                      ),
-                                                                      style: Theme.of(
-                                                                              context)
-                                                                          .textTheme
-                                                                          .bodyMedium,
-                                                                    ),
-                                                                  ))
-                                                              .toList(),
-                                                          onChanged: (_) {
-                                                            setState(() {
-                                                              addProductController
-                                                                  .selectedSubCategory = _;
-                                                            });
-                                                          }),
+                                                          items: isStore &&
+                                                                  selectedIngredients
+                                                                      .isEmpty
+                                                              ? null
+                                                              : addProductController
+                                                                  .selectedCategory
+                                                                  ?.subCategories
+                                                                  .map((e) =>
+                                                                      DropdownMenuItem(
+                                                                        value:
+                                                                            e,
+                                                                        child:
+                                                                            Text(
+                                                                          capitalize(
+                                                                            e.subcategoryName.toLowerCase(),
+                                                                          ),
+                                                                          style: Theme.of(context)
+                                                                              .textTheme
+                                                                              .bodyMedium,
+                                                                        ),
+                                                                      ))
+                                                                  .toList(),
+                                                          onChanged: isStore &&
+                                                                  selectedIngredients
+                                                                          .length ==
+                                                                      1
+                                                              ? null
+                                                              : (_) {
+                                                                  setState(() {
+                                                                    addProductController
+                                                                        .selectedSubCategory = _;
+                                                                  });
+                                                                }),
                                                     ),
                                                   ],
                                                 ),
                                                 const SizedBox(
                                                   height: 12,
                                                 ),
-                                                productProvider
-                                                        .myPurchases.isEmpty
-                                                    ? NoIngredientsDialog()
-                                                    : SingleChildScrollView(
-                                                        scrollDirection:
-                                                            Axis.horizontal,
-                                                        child: DataTable(
-                                                            border:
-                                                                TableBorder.all(
-                                                              width: 2.0,
-                                                              color: Theme.of(
-                                                                      context)
-                                                                  .colorScheme
-                                                                  .background,
+                                                isStore
+                                                    ? productProvider
+                                                            .myPurchases
+                                                            .where((element) =>
+                                                                element
+                                                                    .orderStatusId >=
+                                                                4)
+                                                            .isEmpty
+                                                        // productProvider
+                                                        //     .myPurchases
+
+                                                        //     .isEmpty
+                                                        ? NoIngredientsDialog()
+                                                        : SingleChildScrollView(
+                                                            scrollDirection:
+                                                                Axis.horizontal,
+                                                            child: DataTable(
+                                                              border:
+                                                                  TableBorder
+                                                                      .all(
+                                                                width: 2.0,
+                                                                color: Theme.of(
+                                                                        context)
+                                                                    .colorScheme
+                                                                    .background,
+                                                              ),
+                                                              headingRowColor: MaterialStateColor.resolveWith(
+                                                                  (states) => Theme.of(
+                                                                          context)
+                                                                      .colorScheme
+                                                                      .primary),
+                                                              headingTextStyle: MaterialStateTextStyle.resolveWith((states) =>
+                                                                  Theme.of(
+                                                                          context)
+                                                                      .textTheme
+                                                                      .titleMedium ??
+                                                                  TextStyle()),
+                                                              columns: const [
+                                                                DataColumn(
+                                                                    label: Text(
+                                                                        "Select")),
+                                                                DataColumn(
+                                                                    label: Text(
+                                                                        "Ingredient")),
+                                                                DataColumn(
+                                                                    label: Text(
+                                                                        "Farmer")),
+                                                                DataColumn(
+                                                                    label: Text(
+                                                                        "Date of Purchase")),
+                                                                DataColumn(
+                                                                    label: Text(
+                                                                        "Qty")),
+                                                              ],
+                                                              rows: productProvider
+                                                                  .myPurchases
+                                                                  .fold<
+                                                                      List<
+                                                                          ProductOrder>>(
+                                                                    [],
+                                                                    (previousValue,
+                                                                            element) =>
+                                                                        previousValue
+                                                                          ..addAll(
+                                                                              element.productDetails),
+                                                                  )
+                                                                  .toSet()
+                                                                  .map(
+                                                                    (purchaseOrder) =>
+                                                                        DataRow(
+                                                                      color: MaterialStateColor.resolveWith((states) => Theme.of(
+                                                                              context)
+                                                                          .colorScheme
+                                                                          .primaryContainer
+                                                                          .withOpacity(
+                                                                              1)),
+                                                                      cells: [
+                                                                        DataCell(
+                                                                          Checkbox(
+                                                                            value:
+                                                                                selectedIngredients.contains(purchaseOrder),
+                                                                            onChanged:
+                                                                                (_) {
+                                                                              setState(() {
+                                                                                if (selectedIngredients.contains(purchaseOrder)) {
+                                                                                  selectedIngredients.remove(purchaseOrder);
+                                                                                } else {
+                                                                                  selectedIngredients.add(purchaseOrder);
+                                                                                }
+                                                                                if (selectedIngredients.length == 1) {
+                                                                                  final productCategory = productProvider.categories.firstWhere((element) => element.categoryId == selectedIngredients.first.categoryId);
+                                                                                  addProductController.selectedCategory = productCategory;
+                                                                                  addProductController.selectedSubCategory = productCategory.subCategories.firstWhere((element) => element.subcategoryId == selectedIngredients.first.subCategoryId);
+                                                                                } else {
+                                                                                  addProductController.selectedCategory = null;
+                                                                                  addProductController.selectedSubCategory = null;
+                                                                                }
+                                                                              });
+                                                                            },
+                                                                          ),
+                                                                        ),
+                                                                        DataCell(
+                                                                            Text(purchaseOrder.name)),
+                                                                        DataCell(
+                                                                          Text(
+                                                                            capitalize(
+                                                                              purchaseOrder.seller.name,
+                                                                            ),
+                                                                          ),
+                                                                        ),
+                                                                        DataCell(
+                                                                          Text(
+                                                                            DateFormat("hh:mm a, dd MMM yyyy").format(DateTime.fromMillisecondsSinceEpoch(purchaseOrder.dateOrdered *
+                                                                                1000)),
+                                                                          ),
+                                                                        ),
+                                                                        DataCell(
+                                                                          Text(
+                                                                            purchaseOrder.orderQuantity.toString(),
+                                                                          ),
+                                                                        ),
+                                                                      ],
+                                                                    ),
+                                                                  )
+                                                                  .toList(),
                                                             ),
-                                                            headingRowColor: MaterialStateColor.resolveWith((states) => Theme.of(context)
-                                                                .colorScheme
-                                                                .primary),
-                                                            headingTextStyle: MaterialStateTextStyle.resolveWith((states) =>
-                                                                Theme.of(context).textTheme.titleMedium ??
-                                                                TextStyle()),
-                                                            columns: const [
-                                                              DataColumn(
-                                                                  label: Text(
-                                                                      "Select")),
-                                                              DataColumn(
-                                                                  label: Text(
-                                                                      "Ingredient")),
-                                                              DataColumn(
-                                                                  label: Text(
-                                                                      "Farmer")),
-                                                              DataColumn(
-                                                                  label: Text(
-                                                                      "Date of Purchase")),
-                                                              DataColumn(
-                                                                  label: Text(
-                                                                      "Qty")),
-                                                            ],
-                                                            rows:
-                                                                productProvider
-                                                                    .myPurchases
-                                                                    .where((element) =>
-                                                                        (int.tryParse(element["products"][0]["order_status_id"]) ?? 0) >=
-                                                                        4)
-                                                                    .fold<List<dynamic>>([],
-                                                                        (previousValue,
-                                                                            element) {
-                                                                      var tempList =
-                                                                          previousValue;
-                                                                      (element.values.toList()[1] as List<
-                                                                              dynamic>)
-                                                                          .forEach(
-                                                                              (element1) {
-                                                                        var tempElement =
-                                                                            element1;
-                                                                        tempElement["farmerName"] = element
-                                                                            .values
-                                                                            .toList()[2];
-                                                                        tempElement["dateOfPurchase"] = element
-                                                                            .values
-                                                                            .toList()[3];
-                                                                        if (tempList
-                                                                            .map((e) =>
-                                                                                e["product_name"])
-                                                                            .contains(tempElement["product_name"])) {
-                                                                        } else {
-                                                                          tempList
-                                                                              .add(tempElement);
-                                                                        }
-                                                                      });
-                                                                      return tempList;
-                                                                    })
-                                                                    .toList()
-                                                                    .asMap()
-                                                                    .map((index,
-                                                                            e) =>
-                                                                        MapEntry(
-                                                                            index,
-                                                                            DataRow(color: MaterialStateColor.resolveWith((states) => Theme.of(context).colorScheme.primaryContainer.withOpacity(index % 2 == 0 ? 1.0 : 0.6)), cells: [
-                                                                              DataCell(
-                                                                                Checkbox(
-                                                                                  value: selectedIngredients.entries.where((element) => element.key == e["product_id"]).isNotEmpty ? selectedIngredients.entries.where((element) => element.key == e["product_id"]).first.value : false,
-                                                                                  onChanged: (_) {
-                                                                                    setState(() {
-                                                                                      addProductController.selectedCategory = null;
-                                                                                      addProductController.selectedSubCategory = null;
-                                                                                      if (selectedIngredients.entries.where((element) => element.key == e["product_id"]).isNotEmpty) {
-                                                                                        selectedIngredients.remove(e["product_id"]);
-                                                                                      } else {
-                                                                                        selectedIngredients[e["product_id"]] = _ ?? !selectedIngredients.entries.where((element) => element.key == e["product_id"]).first.value;
-                                                                                      }
-                                                                                    });
-                                                                                  },
-                                                                                ),
-                                                                              ),
-                                                                              DataCell(Text(e["product_name"])),
-                                                                              DataCell(Text(capitalize(e["farmerName"]))),
-                                                                              DataCell(Text(DateFormat("hh:mm a, dd MMM yyyy").format(DateTime.fromMillisecondsSinceEpoch((int.tryParse(e["dateOfPurchase"]) ?? DateTime.now().millisecondsSinceEpoch) * 1000)))),
-                                                                              DataCell(Text(e["quantity"])),
-                                                                            ])))
-                                                                    .values
-                                                                    .toList()),
-                                                      ),
+                                                          )
+                                                    : SizedBox(),
                                                 Row(
                                                   children: [
                                                     Expanded(
@@ -942,6 +986,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                         profileProvider.fetchingDataType =
                                             "add your product";
                                         profileProvider.showLoader();
+
                                         List<String> urls = [];
                                         await Future.forEach(
                                             addProductController.productImage,

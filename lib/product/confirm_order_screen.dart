@@ -83,10 +83,15 @@ class _ConfirmOrderScreenState extends State<ConfirmOrderScreen> {
                     deliverySlot: "${DateFormat('EEE, dd MMM').format(
                           DateTime.now().add(
                             Duration(
-                              days: deliverySlot ~/ 2,
+                              days: (DateTime.now().hour <= 11
+                                      ? deliverySlot
+                                      : DateTime.now().hour <= 15
+                                          ? deliverySlot + 1
+                                          : deliverySlot + 2) ~/
+                                  2,
                             ),
                           ),
-                        ).toUpperCase()} (${deliverySlot % 2 == 0 ? '7 AM - 11 AM' : '11 AM - 3 PM'})",
+                        ).toUpperCase()} (${deliverySlot % 2 == ((DateTime.now().hour <= 11 ? 0 : DateTime.now().hour <= 15 ? 1 : 0)) ? '7 AM - 11 AM' : '11 AM - 3 PM'})",
                     orderNumber: resData["response"]["order_id"].toString(),
                   )),
         );
@@ -130,13 +135,18 @@ class _ConfirmOrderScreenState extends State<ConfirmOrderScreen> {
               builder: (context) => OrderFailureScreen(
                     response: resData["response"],
                     name: profileProvider.firstName,
-                    deliverySlot: "${DateFormat('EEE, dd MMM').format(
+                    deliverySlot: "${DateFormat('EEE, MMM').format(
                           DateTime.now().add(
                             Duration(
-                              days: deliverySlot ~/ 2,
+                              days: (DateTime.now().hour <= 11
+                                      ? deliverySlot
+                                      : DateTime.now().hour <= 15
+                                          ? deliverySlot + 1
+                                          : deliverySlot + 2) ~/
+                                  2,
                             ),
                           ),
-                        ).toUpperCase()} (${deliverySlot % 2 == 0 ? '7 AM - 11 AM' : '11 AM - 3 PM'})",
+                        ).toUpperCase()} (${deliverySlot % 2 == ((DateTime.now().hour <= 11 ? 0 : DateTime.now().hour <= 15 ? 1 : 0)) ? '7 AM - 11 AM' : '11 AM - 3 PM'})",
                     orderNumber: resData["response"]["order_id"].toString(),
                   )),
         );
@@ -272,15 +282,23 @@ class _ConfirmOrderScreenState extends State<ConfirmOrderScreen> {
                                             OrderSuccessfulScreen(
                                               name: profileProvider.firstName,
                                               deliverySlot:
-                                                  "${DateFormat('EEE, dd MMM').format(
+                                                  "${DateFormat('EEE, MMM').format(
                                                         DateTime.now().add(
                                                           Duration(
-                                                            days:
-                                                                deliverySlot ~/
-                                                                    2,
+                                                            days: (DateTime.now()
+                                                                            .hour <=
+                                                                        11
+                                                                    ? deliverySlot
+                                                                    : DateTime.now().hour <=
+                                                                            15
+                                                                        ? deliverySlot +
+                                                                            1
+                                                                        : deliverySlot +
+                                                                            2) ~/
+                                                                2,
                                                           ),
                                                         ),
-                                                      ).toUpperCase()} (${deliverySlot % 2 == 0 ? '7 AM - 11 AM' : '11 AM - 3 PM'})",
+                                                      ).toUpperCase()} (${deliverySlot % 2 == ((DateTime.now().hour <= 11 ? 0 : DateTime.now().hour <= 15 ? 1 : 0)) ? '7 AM - 11 AM' : '11 AM - 3 PM'})",
                                               orderNumber:
                                                   jsonDecode(response.body)[
                                                           "order_details"]
@@ -773,7 +791,12 @@ class _DeliverySlotChooserState extends State<DeliverySlotChooser> {
                                 .format(
                                   DateTime.now().add(
                                     Duration(
-                                      days: index ~/ 2,
+                                      days: (DateTime.now().hour <= 11
+                                              ? index
+                                              : DateTime.now().hour <= 15
+                                                  ? index + 1
+                                                  : index + 2) ~/
+                                          2,
                                     ),
                                   ),
                                 )
@@ -786,7 +809,13 @@ class _DeliverySlotChooserState extends State<DeliverySlotChooser> {
                                     .withOpacity(0.7)),
                         TextWidget(
                           DateTime.now()
-                              .add(Duration(days: index ~/ 2))
+                              .add(Duration(
+                                  days: (DateTime.now().hour <= 11
+                                          ? index
+                                          : DateTime.now().hour <= 15
+                                              ? index + 1
+                                              : index + 2) ~/
+                                      2))
                               .day
                               .toString(),
                           color: index == widget.deliverySlot
@@ -800,7 +829,14 @@ class _DeliverySlotChooserState extends State<DeliverySlotChooser> {
                           weight: FontWeight.w800,
                         ),
                         TextWidget(
-                            index % 2 == 0 ? '7 AM - 11 AM' : '11 AM - 3 PM',
+                            index % 2 ==
+                                    ((DateTime.now().hour <= 11
+                                        ? 0
+                                        : DateTime.now().hour <= 15
+                                            ? 1
+                                            : 0))
+                                ? '7 AM - 11 AM'
+                                : '11 AM - 3 PM',
                             color: index == widget.deliverySlot
                                 ? Theme.of(context).colorScheme.onPrimary
                                 : Theme.of(context)
